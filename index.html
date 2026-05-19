@@ -6,67 +6,49 @@
 <title>非常論壇</title>
 <style>
 body { font-family:'Georgia', serif; margin:0; padding:0; transition: background 0.3s; }
-header { text-align:center; padding:1.5rem 1rem; position: relative; }
+header { text-align:center; padding:1rem 0; }
 header .flowers-top, header .flowers-bottom { display:flex; justify-content:center; flex-wrap:wrap; }
 header .flowers-top span, header .flowers-bottom span { margin:0 2px; }
-header h1 { font-size:3rem; margin:0.5rem 0; color:#fff; text-shadow:1px 1px 4px #333; }
-header p { font-size:1rem; color:#ffeb3b; margin-top:0.3rem; cursor:pointer; }
-#loginMessage { color:red; display:block; margin-top:5px; font-weight:bold; }
+header h1 { font-size:3rem; color:#fff; text-shadow:1px 1px 4px #333; margin:0.5rem 0; }
+header p { font-size:1rem; color:#ffeb3b; cursor:pointer; margin-top:0.3rem; }
 #bookBtn { display:none; cursor:pointer; font-size:1.5rem; margin-left:10px; }
-#adminNotice { display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%);
-    background: yellow; color: red; padding: 1.5rem; border-radius: 10px; font-weight:bold; text-align:center;
-    z-index:2000; font-size:1.2rem; font-family: 'Arial', sans-serif; }
-#closeNotice { cursor:pointer; margin-left:10px; }
-.module-title { writing-mode: vertical-rl; text-align:center; font-weight:bold; font-size:1.5rem; margin:1rem 0; display:none;}
+.module-title { writing-mode: vertical-rl; font-weight:bold; font-size:1.5rem; text-align:center; margin:1rem 0; display:none; }
 .star-title { color: blue; }
 .sun-title { color: red; }
 .moon-title { color: yellow; }
-@media (max-width:600px){
-  header h1 { font-size:2rem; }
-  header p { font-size:0.9rem; }
-}
 .tabs { display:flex; gap:1rem; justify-content:center; margin-bottom:1rem; flex-wrap:wrap; }
 .tab-btn { padding:0.5rem 1rem; cursor:pointer; border-radius:8px; border:none; font-weight:bold; color:white; }
+.tab-btn.active.star { background-color:#6a5acd; }
 .tab-btn.active.sun { background-color:#ff5722; }
 .tab-btn.active.moon { background-color:#00bcd4; }
-.tab-btn.active.star { background-color: #6a5acd; }
-#trashBtn { font-size:1.2rem; cursor:pointer; margin-left:0.5rem; }
-#searchBox { width:100%; padding:0.5rem; border-radius:10px; border:2px solid #ccc; margin-bottom:1rem; display:block; color:#555; }
+#trashBtn { cursor:pointer; font-size:1.2rem; margin-left:0.5rem; }
+#searchBox { width:100%; padding:0.5rem; border-radius:10px; border:2px solid #ccc; margin-bottom:1rem; color:#555; }
 #searchBox::placeholder { color:#aaa; }
 .new-post textarea { width:100%; height:80px; padding:0.5rem; border-radius:10px; border:2px solid #fff; resize:none; margin-bottom:0.5rem; background:rgba(255,255,255,0.85); }
-.new-post textarea::placeholder { color:#666; }
 .new-post button { padding:0.5rem 1rem; border:none; border-radius:10px; background-color:#ff9800; color:white; font-weight:bold; cursor:pointer; }
-.new-post button:hover { background-color:#f57c00; }
-.posts { margin-top:2rem; }
-.post { background: rgba(255,255,255,0.85); border-radius:15px; padding:1rem; margin-top:1.5rem; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+.posts { margin-top:1rem; }
+.post { background: rgba(255,255,255,0.85); border-radius:15px; padding:1rem; margin-top:1rem; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
 .post.self { background: purple; color:white; }
-.post-content { margin-bottom:0.5rem; white-space:pre-wrap; font-size:0.95rem; }
+.post-content { margin-bottom:0.5rem; white-space:pre-wrap; }
 .post-info { font-size:0.8rem; color:#555; margin-bottom:0.5rem; }
-.post-actions { display:flex; gap:1rem; margin-bottom:0.5rem; flex-wrap:wrap;}
+.post-actions { display:flex; gap:1rem; margin-bottom:0.5rem; flex-wrap:wrap; }
 button.action-btn { background:none; border:none; cursor:pointer; color:#333; font-weight:bold; }
-button.action-btn:hover { text-decoration:underline; }
 .comments { padding-left:1rem; border-left:2px dotted #333; margin-top:0.5rem; }
 .comment { margin-bottom:0.5rem; padding:0.3rem 0.5rem; border-radius:8px; font-size:0.9rem; background:#d0f0fd; }
-.collapse-toggle { cursor:pointer; color:#007bff; font-weight:bold; margin-left:5px; }
 .reply-box { background:#a0e0f0; padding:0.5rem; border-radius:10px; margin-top:0.5rem; }
 #trashScreen { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:white; overflow:auto; z-index:1000; padding:2rem; }
-#trashScreen h2 { text-align:center; margin-bottom:2rem; }
 #backBtn { cursor:pointer; color:#0af; margin-bottom:1rem; display:inline-block; }
+#adminNotice { display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:yellow; color:red; padding:1.5rem; border-radius:10px; font-weight:bold; text-align:center; z-index:2000; font-size:1.2rem; font-family:'Arial', sans-serif; }
+#closeNotice { cursor:pointer; margin-left:10px; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="flowers-top">
-    <span>🌸</span><span>🌺</span><span>🌼</span><span>🌷</span><span>🌹</span>
-  </div>
+  <div class="flowers-top"><span>🌸</span><span>🌺</span><span>🌼</span><span>🌷</span><span>🌹</span></div>
   <h1>非常論壇</h1>
-  <p id="apoiwndBtn">APOIWND</p>
-  <span id="bookBtn">📖</span>
-  <span id="loginMessage"></span>
-  <div class="flowers-bottom">
-    <span>🌸</span><span>🌺</span><span>🌼</span><span>🌷</span><span>🌹</span>
-  </div>
+  <p id="apoiwndBtn">APOIWND</p><span id="bookBtn">📖</span>
+  <div class="flowers-bottom"><span>🌸</span><span>🌺</span><span>🌼</span><span>🌷</span><span>🌹</span></div>
 </header>
 
 <main>
@@ -112,154 +94,80 @@ const firebaseConfig = {
   projectId: "apoiwnd",
   storageBucket: "apoiwnd.firebasestorage.app",
   messagingSenderId: "284452126195",
-  appId: "1:284452126195:web:b644f75e4d37c14f29a686",
-  measurementId: "G-CLG4SB1VTD"
+  appId: "1:284452126195:web:b644f75e4d37c14f29a686"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let currentTab = '';
-let currentUser = '';
+let currentUser = prompt("请输入昵称（匿名可留空）：")||"匿名";
 let isAdmin = JSON.parse(localStorage.getItem('isAdmin')||'false');
-let isTrashAdmin = isAdmin;
-let lastNoticeDate = localStorage.getItem('adminNoticeDate');
-const today = new Date().toDateString();
 
 const postsContainer = document.getElementById('posts');
-const postBtn = document.getElementById('postBtn');
-const postContent = document.getElementById('postContent');
 const tabButtons = document.querySelectorAll('.tab-btn');
 const searchBox = document.getElementById('searchBox');
-const trashScreen = document.getElementById('trashScreen');
-const trashContent = document.getElementById('trashContent');
-const trashBtn = document.getElementById('trashBtn');
-const backBtn = document.getElementById('backBtn');
+const starTitle = document.getElementById('starTitle');
+const sunTitle = document.getElementById('sunTitle');
+const moonTitle = document.getElementById('moonTitle');
 const apoiwndBtn = document.getElementById('apoiwndBtn');
-const loginMessage = document.getElementById('loginMessage');
 const bookBtn = document.getElementById('bookBtn');
-const adminNotice = document.getElementById('adminNotice');
-const noticeText = document.getElementById('noticeText');
-const closeNotice = document.getElementById('closeNotice');
 
-function showAdminNotice(text){
-  if(lastNoticeDate !== today){
-      noticeText.textContent=text;
-      adminNotice.style.display='block';
-      localStorage.setItem('adminNoticeDate', today);
-      lastNoticeDate=today;
-  }
-}
+let lastData={};
 
-closeNotice.addEventListener('click',()=>{ adminNotice.style.display='none'; });
-
-// 超级管理员
 apoiwndBtn.addEventListener('click',()=>{
     const pwd = prompt("请输入超级管理员密码：");
-    if(pwd === "94084vzjj"){
-        isAdmin=true; isTrashAdmin=true;
-        localStorage.setItem('isAdmin',true);
-        bookBtn.style.display='inline-block';
-        showAdminNotice("今天的管理员公告！");
-        alert("已获得超级管理员权限！");
-    } else { alert("密码错误！"); }
-});
-
-bookBtn.addEventListener('click',()=>{
-    if(!isAdmin) return;
-    const text=prompt("请输入今日通告：");
-    if(text) showAdminNotice(text);
+    if(pwd==="94084vzjj"){ isAdmin=true; localStorage.setItem('isAdmin',true); bookBtn.style.display='inline-block'; alert("已获得管理员权限"); } 
+    else alert("密码错误");
 });
 
 // 模块切换
 tabButtons.forEach(btn=>{
     btn.addEventListener('click',()=>{
-        currentTab = btn.dataset.tab;
+        currentTab=btn.dataset.tab;
         tabButtons.forEach(b=>b.classList.remove('active','sun','moon','star'));
         btn.classList.add('active',btn.dataset.tab);
-        // 只显示当前模块标题
-        document.getElementById('starTitle').style.display = currentTab==='star'?'block':'none';
-        document.getElementById('sunTitle').style.display = currentTab==='sun'?'block':'none';
-        document.getElementById('moonTitle').style.display = currentTab==='moon'?'block':'none';
+        starTitle.style.display=currentTab==='star'?'block':'none';
+        sunTitle.style.display=currentTab==='sun'?'block':'none';
+        moonTitle.style.display=currentTab==='moon'?'block':'none';
         searchBox.style.display='none';
         renderPosts(lastData);
     });
 });
 
-// 返回初始页面
-searchBox.addEventListener('input',()=>{ renderPosts(lastData); });
-backBtn.addEventListener('click',()=>{ trashScreen.style.display='none'; });
-
-// 删除帖子
-window.deletePost = function(postId){ runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true); };
-
-// 渲染帖子
-let lastData={};
+// Firebase 数据监听
 onValue(ref(db,'posts'),snapshot=>{
-    lastData = snapshot.val()||{};
+    lastData=snapshot.val()||{};
     renderPosts(lastData);
 });
 
+// 渲染帖子
 function renderPosts(data){
     postsContainer.innerHTML='';
     let entries=Object.entries(data||{}).filter(([id,p])=>p.tab===currentTab);
-    if(currentTab==='' && searchBox.value){
-        entries=Object.entries(data||{}).filter(([id,p])=>p.content.includes(searchBox.value));
-    }
-    let postCount=0;
-    entries.forEach(([id,post])=>{
-        postCount++;
+    entries.forEach(([id,post],index)=>{
         const div=document.createElement('div');
-        div.className='post';
-        if(post.user===currentUser) div.classList.add('self');
-        let contentHTML=post.content;
-        if(contentHTML.length>200){
-            const shortText=contentHTML.substring(0,200)+'...';
-            contentHTML=`<span class="short-text">${shortText}</span><span class="full-text" style="display:none;">${post.content}</span><span class="collapse-toggle" onclick="toggleText(this)">▶</span>`;
-        }
-        // 评论
-        let commentsHTML='';
-        if(post.comments){
-            commentsHTML='<div class="comments">';
-            post.comments.forEach((c,i)=>{
-                let cContent=c.content;
-                if(cContent.length>150){
-                    const shortC=cContent.substring(0,150)+'...';
-                    cContent=`<span class="short-text">${shortC}</span><span class="full-text" style="display:none;">${c.content}</span><span class="collapse-toggle" onclick="toggleText(this)">▶</span>`;
-                }
-                commentsHTML+=`<div class="comment"><strong>${i+1}l</strong> ${cContent} <button onclick="replyComment('${id}',${i})">回复</button></div>`;
-                if(c.replies){
-                    commentsHTML+='<div class="comments">';
-                    c.replies.forEach((r,j)=>{ commentsHTML+=`<div class="comment"><strong>${j+1}l</strong> ${r}</div>`; });
-                    commentsHTML+='</div>';
-                }
-            });
-            commentsHTML+='</div>';
-        }
-        let deleteBtn='';
-        if(post.user===currentUser) deleteBtn=`<button onclick="deletePost('${id}')">删除</button>`;
-        div.innerHTML=`<div class="post-content"><strong>${postCount}L</strong> ${contentHTML}</div>
-                       <div class="post-info">发表时间: ${post.time}</div>
-                       <div class="post-actions"><button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button> ${deleteBtn}</div>
-                       ${commentsHTML}`;
+        div.className='post'+(post.user===currentUser?' self':'');
+        div.innerHTML=`<div class="post-content"><strong>${index+1}L</strong> ${post.content}</div>
+        <div class="post-info">发表时间: ${post.time}</div>
+        <div class="post-actions"><button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button>
+        ${(post.user===currentUser)?`<button onclick="deletePost('${id}')">删除</button>`:''}</div>`;
         postsContainer.prepend(div);
     });
 }
 
-// 发布帖子
-postBtn.addEventListener('click',()=>{
-    const content=postContent.value.trim();
-    if(!content){ alert('请输入内容'); return; }
+// 发帖
+document.getElementById('postBtn').addEventListener('click',()=>{
+    const content=document.getElementById('postContent').value.trim();
+    if(!content) return;
     const timeStr=new Date().toLocaleString();
     push(ref(db,'posts'),{tab:currentTab||'star',content,likes:0,comments:[],time:timeStr,user:currentUser});
-    postContent.value='';
+    document.getElementById('postContent').value='';
 });
 
-// 回复与点赞
-window.replyComment=function(postId,index){ const r=prompt("请输入回复:"); if(!r) return; runTransaction(ref(db,`posts/${postId}/comments/${index}/replies`),old=>{ old=old||[]; old.push(r); return old; }); }
+// 点赞与删除
 window.likePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/likes'),likes=>(likes||0)+1); }
-window.toggleText=function(el){ const parent=el.parentElement; const s=parent.querySelector('.short-text'); const f=parent.querySelector('.full-text'); if(s.style.display==='none'){s.style.display=''; f.style.display='none'; el.textContent='▶';} else {s.style.display='none'; f.style.display=''; el.textContent='▼';}
-</script>
+window.deletePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true); }
 
+</script>
 </body>
 </html>
