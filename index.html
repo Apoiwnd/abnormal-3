@@ -17,6 +17,10 @@ header p { font-size:1rem; color:#ffeb3b; margin-top:0.3rem; cursor:pointer; }
     background: yellow; color: red; padding: 1.5rem; border-radius: 10px; font-weight:bold; text-align:center;
     z-index:2000; font-size:1.2rem; font-family: 'Arial', sans-serif; }
 #closeNotice { cursor:pointer; margin-left:10px; }
+.module-title { writing-mode: vertical-rl; text-align:center; font-weight:bold; font-size:1.5rem; margin:1rem 0; }
+.star-title { color: blue; }
+.sun-title { color: red; }
+.moon-title { color: yellow; }
 @media (max-width:600px){
   header h1 { font-size:2rem; }
   header p { font-size:0.9rem; }
@@ -35,6 +39,7 @@ header p { font-size:1rem; color:#ffeb3b; margin-top:0.3rem; cursor:pointer; }
 .new-post button:hover { background-color:#f57c00; }
 .posts { margin-top:2rem; }
 .post { background: rgba(255,255,255,0.85); border-radius:15px; padding:1rem; margin-top:1.5rem; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+.post.self { background: purple; color:white; }
 .post-content { margin-bottom:0.5rem; white-space:pre-wrap; font-size:0.95rem; }
 .post-info { font-size:0.8rem; color:#555; margin-bottom:0.5rem; }
 .post-actions { display:flex; gap:1rem; margin-bottom:0.5rem; flex-wrap:wrap;}
@@ -65,6 +70,7 @@ button.action-btn:hover { text-decoration:underline; }
 </header>
 
 <main>
+  <input type="text" id="searchBox" placeholder="你想回忆什么？🤷‍♂️">
   <div class="tabs">
     <button class="tab-btn star active" data-tab="star">⭐ 星星</button>
     <button class="tab-btn sun" data-tab="sun">☀ 太阳</button>
@@ -72,10 +78,12 @@ button.action-btn:hover { text-decoration:underline; }
     <span id="trashBtn">🗑</span>
   </div>
 
-  <input type="text" id="searchBox" placeholder="你想回忆什么？🤷‍♂️">
+  <section class="module-title star-title" id="starTitle">表象即是起事</section>
+  <section class="module-title sun-title" id="sunTitle">金刚也不敌</section>
+  <section class="module-title moon-title" id="moonTitle">鸟儿在歌唱</section>
 
   <section class="new-post">
-    <textarea id="postContent" placeholder="大狗大狗叫叫叫"></textarea>
+    <textarea id="postContent" placeholder="请输入内容..."></textarea>
     <button id="postBtn">发表</button>
   </section>
 
@@ -88,7 +96,6 @@ button.action-btn:hover { text-decoration:underline; }
   <div id="trashContent"></div>
 </section>
 
-<!-- 超级管理员公告弹窗 -->
 <div id="adminNotice">
   <span id="noticeText">超级管理员公告</span>
   <span id="closeNotice">❌</span>
@@ -112,10 +119,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let currentTab = 'star';
+let currentTab = '';
 let currentUser = '';
-let isAdmin = false;
-let isTrashAdmin = false;
+let isAdmin = JSON.parse(localStorage.getItem('isAdmin')||'false');
+let isTrashAdmin = isAdmin;
+let lastNoticeDate = localStorage.getItem('adminNoticeDate');
+const today = new Date().toDateString();
+
 const postsContainer = document.getElementById('posts');
 const postBtn = document.getElementById('postBtn');
 const postContent = document.getElementById('postContent');
@@ -132,172 +142,126 @@ const adminNotice = document.getElementById('adminNotice');
 const noticeText = document.getElementById('noticeText');
 const closeNotice = document.getElementById('closeNotice');
 
-let lastNoticeDate = localStorage.getItem('adminNoticeDate');
-const today = new Date().toDateString();
+function showAdminNotice(text){
+  if(lastNoticeDate !== today){
+      noticeText.textContent=text;
+      adminNotice.style.display='block';
+      localStorage.setItem('adminNoticeDate', today);
+      lastNoticeDate=today;
+  }
+}
 
-// 超级管理员登录
-apoiwndBtn.addEventListener('click', ()=>{
+closeNotice.addEventListener('click',()=>{ adminNotice.style.display='none'; });
+
+// 管理员点击 APOIWND
+apoiwndBtn.addEventListener('click',()=>{
     const pwd = prompt("请输入超级管理员密码：");
     if(pwd === "94084vzjj"){
-        alert("已获得超级权限！");
-        isAdmin = true;
-        isTrashAdmin = true;
-        bookBtn.style.display = 'inline-block';
+        isAdmin=true; isTrashAdmin=true;
+        localStorage.setItem('isAdmin',true);
+        bookBtn.style.display='inline-block';
         showAdminNotice("今天的管理员公告！");
-    } else {
-        alert("密码错误！");
-    }
+        alert("已获得超级管理员权限！");
+    } else { alert("密码错误！"); }
 });
 
-// 点击书本图标弹窗
-bookBtn.addEventListener('click', ()=>{ showAdminNotice("今天的管理员公告！"); });
+// 点击书本按钮可手动发公告
+bookBtn.addEventListener('click',()=>{
+    if(!isAdmin) return;
+    const text=prompt("请输入今日通告：");
+    if(text) showAdminNotice(text);
+});
 
-closeNotice.addEventListener('click', ()=>{ adminNotice.style.display='none'; });
-
-// 弹窗函数
-function showAdminNotice(text){
-    if(lastNoticeDate !== today){
-        noticeText.textContent = text;
-        adminNotice.style.display = 'block';
-        localStorage.setItem('adminNoticeDate', today);
-        lastNoticeDate = today;
-    }
-}
-
-// 登录模块
-function login(tab){
-  loginMessage.textContent = '';
-  if(tab==='sun'){
-    const pw = prompt("请输入太阳模块密码：");
-    if(pw !== "太阳"){
-        loginMessage.textContent = "表象即是启示";
-        return false;
-    }
-  }
-  if(tab==='moon'){
-    const pw = prompt("请输入月亮模块密码：");
-    if(pw !== "月亮"){
-        loginMessage.textContent = "表象即是启示";
-        return false;
-    }
-  }
-  currentUser = prompt("请输入昵称（用于删除权限）","匿名");
-  return true;
-}
-
-// 背景切换
-function updateBackground(){
-  if(currentTab==='sun'){ document.body.style.background = "linear-gradient(135deg,#ff5722,#ffeb3b)"; searchBox.style.display='none'; }
-  else if(currentTab==='moon'){ document.body.style.background = "linear-gradient(135deg,#00bcd4,#8bc34a)"; searchBox.style.display='none'; }
-  else if(currentTab==='star'){ document.body.style.background = "linear-gradient(135deg,#add8e6,#ffcccc)"; searchBox.style.display='block'; }
-}
-updateBackground();
-
+// 模块切换
 tabButtons.forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    if(btn.dataset.tab!=='star' && !login(btn.dataset.tab)) return;
-    tabButtons.forEach(b=>b.classList.remove('active','sun','moon','star'));
-    btn.classList.add('active', btn.dataset.tab);
-    currentTab = btn.dataset.tab;
-    trashScreen.style.display='none';
-    updateBackground();
-  });
+    btn.addEventListener('click',()=>{
+        currentTab = btn.dataset.tab;
+        tabButtons.forEach(b=>b.classList.remove('active','sun','moon','star'));
+        btn.classList.add('active',btn.dataset.tab);
+        // 搜索框仅初始页面显示
+        searchBox.style.display='none';
+        renderPosts(lastData);
+    });
 });
 
-trashBtn.addEventListener('click', ()=>{ trashScreen.style.display='block'; updateTrash(); });
-backBtn.addEventListener('click', ()=>{ trashScreen.style.display='none'; });
+// 返回初始显示搜索框
+searchBox.addEventListener('input',()=>{ renderPosts(lastData); });
 
-// 渲染帖子
-function renderPosts(postsData){
-  postsContainer.innerHTML='';
-  let filtered = Object.entries(postsData||{}).filter(([id,post])=>post.tab===currentTab && !post.deleted);
-  if(currentTab==='star' && searchBox.value){
-    filtered = filtered.filter(([id,post])=>post.content.includes(searchBox.value));
-  }
-  let postCount=0;
-  filtered.forEach(([id,post])=>{
-    postCount++;
-    const postEl=document.createElement('div'); postEl.className='post';
-    let contentHTML=post.content;
-    if(contentHTML.length>200){
-      const shortText=contentHTML.substring(0,200)+'...';
-      contentHTML=`<span class="short-text">${shortText}</span><span class="full-text" style="display:none;">${post.content}</span><span class="collapse-toggle" onclick="toggleText(this)">▶</span>`;
+backBtn.addEventListener('click',()=>{ trashScreen.style.display='none'; });
+
+// 删除帖子
+window.deletePost = function(postId){
+  runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true);
+};
+
+// 刷新帖子
+let lastData={};
+onValue(ref(db,'posts'),snapshot=>{
+    lastData = snapshot.val()||{};
+    renderPosts(lastData);
+});
+
+function renderPosts(data){
+    postsContainer.innerHTML='';
+    let entries=Object.entries(data||{}).filter(([id,p])=>p.tab===currentTab || currentTab==='');
+    // 搜索框可检索所有模块
+    if(currentTab==='' && searchBox.value){
+        entries=entries.filter(([id,p])=>p.content.includes(searchBox.value));
     }
-    let commentsHTML='';
-    if(post.comments){
-      commentsHTML='<div class="comments">';
-      post.comments.forEach((c,i)=>{
-        let cContent=c.content;
-        if(cContent.length>150){
-          const shortC=cContent.substring(0,150)+'...';
-          cContent=`<span class="short-text">${shortC}</span><span class="full-text" style="display:none;">${c.content}</span><span class="collapse-toggle" onclick="toggleText(this)">▶</span>`;
+    let postCount=0;
+    entries.forEach(([id,post])=>{
+        postCount++;
+        const div=document.createElement('div');
+        div.className='post';
+        if(post.user===currentUser) div.classList.add('self');
+        let contentHTML=post.content;
+        if(contentHTML.length>200){
+            const shortText=contentHTML.substring(0,200)+'...';
+            contentHTML=`<span class="short-text">${shortText}</span><span class="full-text" style="display:none;">${post.content}</span><span class="collapse-toggle" onclick="toggleText(this)">▶</span>`;
         }
-        commentsHTML+=`<div class="comment"><strong>${i+1}l</strong> ${cContent} <button onclick="replyComment('${id}',${i})">回复</button></div>`;
-        if(c.replies){
-          commentsHTML+='<div class="comments">';
-          c.replies.forEach((r,j)=>{commentsHTML+=`<div class="comment"><strong>${j+1}l</strong> ${r}</div>`;});
-          commentsHTML+='</div>';
+        // 评论
+        let commentsHTML='';
+        if(post.comments){
+            commentsHTML='<div class="comments">';
+            post.comments.forEach((c,i)=>{
+                let cContent=c.content;
+                if(cContent.length>150){
+                    const shortC=cContent.substring(0,150)+'...';
+                    cContent=`<span class="short-text">${shortC}</span><span class="full-text" style="display:none;">${c.content}</span><span class="collapse-toggle" onclick="toggleText(this)">▶</span>`;
+                }
+                commentsHTML+=`<div class="comment"><strong>${i+1}l</strong> ${cContent} <button onclick="replyComment('${id}',${i})">回复</button></div>`;
+                if(c.replies){
+                    commentsHTML+='<div class="comments">';
+                    c.replies.forEach((r,j)=>{ commentsHTML+=`<div class="comment"><strong>${j+1}l</strong> ${r}</div>`; });
+                    commentsHTML+='</div>';
+                }
+            });
+            commentsHTML+='</div>';
         }
-      });
-      commentsHTML+='</div>';
-    }
-    let deleteBtn='';
-    if(isAdmin || post.user===currentUser) deleteBtn=`<button onclick="deletePost('${id}')">删除</button>`;
-    postEl.innerHTML=`<div class="post-content"><strong>${postCount}L</strong> ${contentHTML}</div>
+        let deleteBtn='';
+        if(post.user===currentUser) deleteBtn=`<button onclick="deletePost('${id}')">删除</button>`;
+        div.innerHTML=`<div class="post-content"><strong>${postCount}L</strong> ${contentHTML}</div>
                        <div class="post-info">发表时间: ${post.time}</div>
                        <div class="post-actions"><button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button> ${deleteBtn}</div>
                        ${commentsHTML}`;
-    postsContainer.prepend(postEl);
-  });
-}
-
-// 渲染垃圾箱
-function updateTrash(){
-  trashContent.innerHTML='';
-  onValue(ref(db,'posts'),snapshot=>{
-    const data=snapshot.val()||{};
-    Object.entries(data).forEach(([id,post])=>{
-      if(post.deleted && post.tab===currentTab){
-        const postEl = document.createElement('div');
-        postEl.className='post';
-        let deleteBtn = '';
-        if(isTrashAdmin){
-            deleteBtn = `<button onclick="deletePost('${id}')">删除</button>`;
-        }
-        postEl.innerHTML=`<div class="post-content"><strong>${post.floor || ''}L</strong> ${post.content}</div>
-                           <div class="post-info">发表时间: ${post.time}</div>
-                           <div class="post-actions">${deleteBtn}</div>`;
-        trashContent.appendChild(postEl);
-      }
+        postsContainer.prepend(div);
     });
-  });
 }
 
-onValue(ref(db,'posts'),snapshot=>{const data=snapshot.val()||{}; renderPosts(data);});
-
+// 发布帖子
 postBtn.addEventListener('click',()=>{
-  const content = postContent.value.trim();
-  if(!content){ alert('咯咯咯'); return; }
-  const timeStr = new Date().toLocaleString();
-  push(ref(db,'posts'),{tab:currentTab,content,likes:0,comments:[],time:timeStr,user:currentUser});
-  postContent.value='';
+    const content=postContent.value.trim();
+    if(!content){ alert('请输入内容'); return; }
+    const timeStr=new Date().toLocaleString();
+    push(ref(db,'posts'),{tab:currentTab||'star',content,likes:0,comments:[],time:timeStr,user:currentUser});
+    postContent.value='';
 });
 
-// 公共函数
+// 回复与点赞
+window.replyComment=function(postId,index){ const r=prompt("请输入回复:"); if(!r) return; runTransaction(ref(db,`posts/${postId}/comments/${index}/replies`),old=>{ old=old||[]; old.push(r); return old; }); }
 window.likePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/likes'),likes=>(likes||0)+1); }
-window.commentPost=function(postId){ 
-  const commentText = prompt("请输入你的评论："); 
-  if(!commentText) return;
-  runTransaction(ref(db,'posts/'+postId+'/comments'),c=>{c=c||[]; c.push({content:commentText,replies:[],user:currentUser}); return c;});
-}
-window.replyComment=function(postId,commentIndex){
-  const replyText=prompt("回复该评论：");
-  if(!replyText) return;
-  runTransaction(ref(db,`posts/${postId}/comments/${commentIndex}/replies`),r=>{r=r||[]; r.push(replyText); return r;});
-}
-window.toggleText=function(el){ const parent=el.parentElement; const shortText=parent.querySelector('.short-text'); const fullText=parent.querySelector('.full-text'); if(shortText.style.display==="none"){shortText.style.display=""; fullText.style.display="none"; el.textContent="▶";}else{shortText.style.display="none"; fullText.style.display=""; el.textContent="▼";}}
-window.deletePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true);}
-searchBox.addEventListener('input',()=>{onValue(ref(db,'posts'),snapshot=>{const data=snapshot.val()||{}; renderPosts(data);});});
+window.toggleText=function(el){ const parent=el.parentElement; const s=parent.querySelector('.short-text'); const f=parent.querySelector('.full-text'); if(s.style.display==='none'){s.style.display=''; f.style.display='none'; el.textContent='▶';} else {s.style.display='none'; f.style.display=''; el.textContent='▼';}
+
 </script>
 
 </body>
