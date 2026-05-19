@@ -17,7 +17,7 @@ header p { font-size:1rem; color:#ffeb3b; margin-top:0.3rem; cursor:pointer; }
     background: yellow; color: red; padding: 1.5rem; border-radius: 10px; font-weight:bold; text-align:center;
     z-index:2000; font-size:1.2rem; font-family: 'Arial', sans-serif; }
 #closeNotice { cursor:pointer; margin-left:10px; }
-.module-title { writing-mode: vertical-rl; text-align:center; font-weight:bold; font-size:1.5rem; margin:1rem 0; }
+.module-title { writing-mode: vertical-rl; text-align:center; font-weight:bold; font-size:1.5rem; margin:1rem 0; display:none;}
 .star-title { color: blue; }
 .sun-title { color: red; }
 .moon-title { color: yellow; }
@@ -72,7 +72,7 @@ button.action-btn:hover { text-decoration:underline; }
 <main>
   <input type="text" id="searchBox" placeholder="你想回忆什么？🤷‍♂️">
   <div class="tabs">
-    <button class="tab-btn star active" data-tab="star">⭐ 星星</button>
+    <button class="tab-btn star" data-tab="star">⭐ 星星</button>
     <button class="tab-btn sun" data-tab="sun">☀ 太阳</button>
     <button class="tab-btn moon" data-tab="moon">🌙 月亮</button>
     <span id="trashBtn">🗑</span>
@@ -153,7 +153,7 @@ function showAdminNotice(text){
 
 closeNotice.addEventListener('click',()=>{ adminNotice.style.display='none'; });
 
-// 管理员点击 APOIWND
+// 超级管理员
 apoiwndBtn.addEventListener('click',()=>{
     const pwd = prompt("请输入超级管理员密码：");
     if(pwd === "94084vzjj"){
@@ -165,7 +165,6 @@ apoiwndBtn.addEventListener('click',()=>{
     } else { alert("密码错误！"); }
 });
 
-// 点击书本按钮可手动发公告
 bookBtn.addEventListener('click',()=>{
     if(!isAdmin) return;
     const text=prompt("请输入今日通告：");
@@ -178,23 +177,23 @@ tabButtons.forEach(btn=>{
         currentTab = btn.dataset.tab;
         tabButtons.forEach(b=>b.classList.remove('active','sun','moon','star'));
         btn.classList.add('active',btn.dataset.tab);
-        // 搜索框仅初始页面显示
+        // 只显示当前模块标题
+        document.getElementById('starTitle').style.display = currentTab==='star'?'block':'none';
+        document.getElementById('sunTitle').style.display = currentTab==='sun'?'block':'none';
+        document.getElementById('moonTitle').style.display = currentTab==='moon'?'block':'none';
         searchBox.style.display='none';
         renderPosts(lastData);
     });
 });
 
-// 返回初始显示搜索框
+// 返回初始页面
 searchBox.addEventListener('input',()=>{ renderPosts(lastData); });
-
 backBtn.addEventListener('click',()=>{ trashScreen.style.display='none'; });
 
 // 删除帖子
-window.deletePost = function(postId){
-  runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true);
-};
+window.deletePost = function(postId){ runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true); };
 
-// 刷新帖子
+// 渲染帖子
 let lastData={};
 onValue(ref(db,'posts'),snapshot=>{
     lastData = snapshot.val()||{};
@@ -203,10 +202,9 @@ onValue(ref(db,'posts'),snapshot=>{
 
 function renderPosts(data){
     postsContainer.innerHTML='';
-    let entries=Object.entries(data||{}).filter(([id,p])=>p.tab===currentTab || currentTab==='');
-    // 搜索框可检索所有模块
+    let entries=Object.entries(data||{}).filter(([id,p])=>p.tab===currentTab);
     if(currentTab==='' && searchBox.value){
-        entries=entries.filter(([id,p])=>p.content.includes(searchBox.value));
+        entries=Object.entries(data||{}).filter(([id,p])=>p.content.includes(searchBox.value));
     }
     let postCount=0;
     entries.forEach(([id,post])=>{
@@ -261,7 +259,6 @@ postBtn.addEventListener('click',()=>{
 window.replyComment=function(postId,index){ const r=prompt("请输入回复:"); if(!r) return; runTransaction(ref(db,`posts/${postId}/comments/${index}/replies`),old=>{ old=old||[]; old.push(r); return old; }); }
 window.likePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/likes'),likes=>(likes||0)+1); }
 window.toggleText=function(el){ const parent=el.parentElement; const s=parent.querySelector('.short-text'); const f=parent.querySelector('.full-text'); if(s.style.display==='none'){s.style.display=''; f.style.display='none'; el.textContent='▶';} else {s.style.display='none'; f.style.display=''; el.textContent='▼';}
-
 </script>
 
 </body>
