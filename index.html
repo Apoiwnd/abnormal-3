@@ -3,18 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>非常论坛</title>
+<title>非常論壇</title>
 <style>
 body { font-family:'Georgia', serif; margin:0; padding:0; transition: background 0.3s; }
 header { text-align:center; padding:1.5rem 1rem; position: relative; }
-header h1 { font-size:3rem; margin:0; display:inline-block; color:#fff; text-shadow:1px 1px 4px #333; }
-header h1::before { content:'🌸🌺🌼🌷🌹🌻🌸🌺🌼'; margin-right:5px; }
-header h1::after { content:'🌸🌺🌼🌷🌹🌻🌸🌺🌼'; margin-left:5px; }
-header p { font-size:1rem; color:#ffeb3b; margin-top:0.3rem; }
+header .flowers-top, header .flowers-bottom { display:flex; justify-content:center; flex-wrap:wrap; }
+header .flowers-top span, header .flowers-bottom span { margin:0 2px; }
+header h1 { font-size:3rem; margin:0.5rem 0; color:#fff; text-shadow:1px 1px 4px #333; }
+header p { font-size:1rem; color:#ffeb3b; margin-top:0.3rem; cursor:pointer; }
 @media (max-width:600px){
   header h1 { font-size:2rem; }
   header p { font-size:0.9rem; }
-  header h1::before, header h1::after { font-size:0.8rem; }
 }
 .tabs { display:flex; gap:1rem; justify-content:center; margin-bottom:1rem; flex-wrap:wrap; }
 .tab-btn { padding:0.5rem 1rem; cursor:pointer; border-radius:8px; border:none; font-weight:bold; color:white; }
@@ -47,8 +46,14 @@ button.action-btn:hover { text-decoration:underline; }
 <body>
 
 <header>
-  <h1>非常论坛</h1>
-  <p>Apoiwnd</p>
+  <div class="flowers-top">
+    <span>🌸</span><span>🌺</span><span>🌼</span><span>🌷</span><span>🌹</span>
+  </div>
+  <h1>飛常論壇</h1>
+  <p id="apoiwndBtn">APOIWND</p>
+  <div class="flowers-bottom">
+    <span>🌸</span><span>🌺</span><span>🌼</span><span>🌷</span><span>🌹</span>
+  </div>
 </header>
 
 <main>
@@ -59,10 +64,10 @@ button.action-btn:hover { text-decoration:underline; }
     <span id="trashBtn">🗑</span>
   </div>
 
-  <input type="text" id="searchBox" placeholder="你想找到什么呢? 😄">
+  <input type="text" id="searchBox" placeholder="你想回忆什么？🤷‍♂️">
 
   <section class="new-post">
-    <textarea id="postContent" placeholder="你想说点什么呢？"></textarea>
+    <textarea id="postContent" placeholder="大狗大狗叫叫叫"></textarea>
     <button id="postBtn">发表</button>
   </section>
 
@@ -95,6 +100,7 @@ const db = getDatabase(app);
 
 let currentTab = 'star';
 let currentUser = '';
+let isAdmin = false;
 const postsContainer = document.getElementById('posts');
 const postBtn = document.getElementById('postBtn');
 const postContent = document.getElementById('postContent');
@@ -104,6 +110,17 @@ const trashScreen = document.getElementById('trashScreen');
 const trashContent = document.getElementById('trashContent');
 const trashBtn = document.getElementById('trashBtn');
 const backBtn = document.getElementById('backBtn');
+const apoiwndBtn = document.getElementById('apoiwndBtn');
+
+apoiwndBtn.addEventListener('click', ()=>{
+    const pwd = prompt("请输入超级管理员密码：");
+    if(pwd === "94084vzjj"){
+        alert("已获得超级权限，可删除所有帖子！");
+        isAdmin = true;
+    } else {
+        alert("密码错误，无法获得权限。");
+    }
+});
 
 function login(tab){
   if(tab==='sun'){
@@ -179,7 +196,7 @@ function renderPosts(postsData){
       commentsHTML+='</div>';
     }
     let deleteBtn='';
-    if(post.user===currentUser) deleteBtn=`<button onclick="deletePost('${id}')">删除</button>`;
+    if(isAdmin || post.user===currentUser) deleteBtn=`<button onclick="deletePost('${id}')">删除</button>`;
     postEl.innerHTML=`<div class="post-content"><strong>${postCount}L</strong> ${contentHTML}</div><div class="post-info">发表时间: ${post.time}</div><div class="post-actions"><button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button> ${deleteBtn}</div>${commentsHTML}`;
     postsContainer.prepend(postEl);
   });
@@ -204,7 +221,7 @@ onValue(ref(db,'posts'),snapshot=>{const data=snapshot.val()||{}; renderPosts(da
 
 postBtn.addEventListener('click',()=>{
   const content = postContent.value.trim();
-  if(!content){ alert('请输入内容'); return; }
+  if(!content){ alert('咯咯咯'); return; }
   const timeStr = new Date().toLocaleString();
   push(ref(db,'posts'),{tab:currentTab,content,likes:0,comments:[],time:timeStr,user:currentUser});
   postContent.value='';
@@ -212,12 +229,12 @@ postBtn.addEventListener('click',()=>{
 
 window.likePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/likes'),likes=>(likes||0)+1); }
 window.commentPost=function(postId){ 
-  const commentText = prompt("输入你的评论："); 
+  const commentText = prompt("汪汪汪："); 
   if(!commentText) return;
   runTransaction(ref(db,'posts/'+postId+'/comments'),c=>{c=c||[]; c.push({content:commentText,replies:[],user:currentUser}); return c;});
 }
 window.replyComment=function(postId,commentIndex){
-  const replyText=prompt("回复该评论：");
+  const replyText=prompt("喵喵喵：");
   if(!replyText) return;
   runTransaction(ref(db,`posts/${postId}/comments/${commentIndex}/replies`),r=>{r=r||[]; r.push(replyText); return r;});
 }
