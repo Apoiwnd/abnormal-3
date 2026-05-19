@@ -6,32 +6,42 @@
 <title>非常论坛</title>
 <style>
 body { font-family:'Georgia', serif; margin:0; padding:0; transition: background 0.3s; }
-header { text-align:center; padding:2rem 1rem; position: relative; }
-header h1 { font-size:4rem; margin:0; display:inline-block; color:#fff; text-shadow:1px 1px 4px #333; }
+header { text-align:center; padding:1.5rem 1rem; position: relative; }
+header h1 { font-size:3rem; margin:0; display:inline-block; color:#fff; text-shadow:1px 1px 4px #333; }
 header h1::before { content:'🌸🌺🌼🌷🌹🌻🌸🌺🌼'; margin-right:5px; }
 header h1::after { content:'🌸🌺🌼🌷🌹🌻🌸🌺🌼'; margin-left:5px; }
-header p { font-size:1.2rem; color:#ffeb3b; margin-top:0.5rem; }
-main { max-width:900px; margin:2rem auto; padding:0 1rem; }
-.tabs { display:flex; gap:1rem; justify-content:center; margin-bottom:1rem; }
+header p { font-size:1rem; color:#ffeb3b; margin-top:0.3rem; }
+@media (max-width:600px){
+  header h1 { font-size:2rem; }
+  header p { font-size:0.9rem; }
+  header h1::before, header h1::after { font-size:0.8rem; }
+}
+.tabs { display:flex; gap:1rem; justify-content:center; margin-bottom:1rem; flex-wrap:wrap; }
 .tab-btn { padding:0.5rem 1rem; cursor:pointer; border-radius:8px; border:none; font-weight:bold; color:white; }
 .tab-btn.active.sun { background-color:#ff5722; }
 .tab-btn.active.moon { background-color:#00bcd4; }
 .tab-btn.active.star { background-color: #6a5acd; }
+#trashBtn { font-size:1.2rem; cursor:pointer; margin-left:0.5rem; }
+#searchBox { width:100%; padding:0.5rem; border-radius:10px; border:2px solid #ccc; margin-bottom:1rem; display:block; color:#555; }
+#searchBox::placeholder { color:#aaa; }
 .new-post textarea { width:100%; height:80px; padding:0.5rem; border-radius:10px; border:2px solid #fff; resize:none; margin-bottom:0.5rem; background:rgba(255,255,255,0.85); }
+.new-post textarea::placeholder { color:#666; }
 .new-post button { padding:0.5rem 1rem; border:none; border-radius:10px; background-color:#ff9800; color:white; font-weight:bold; cursor:pointer; }
 .new-post button:hover { background-color:#f57c00; }
-#searchBox { width:100%; padding:0.5rem; border-radius:10px; border:2px solid #ccc; margin-bottom:1rem; }
 .posts { margin-top:2rem; }
-.post { background: rgba(255,255,255,0.85); border-radius:15px; padding:1rem; margin-top:1.5rem; }
+.post { background: rgba(255,255,255,0.85); border-radius:15px; padding:1rem; margin-top:1.5rem; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
 .post-content { margin-bottom:0.5rem; white-space:pre-wrap; font-size:0.95rem; }
 .post-info { font-size:0.8rem; color:#555; margin-bottom:0.5rem; }
-.post-actions { display:flex; gap:1rem; margin-bottom:0.5rem; }
+.post-actions { display:flex; gap:1rem; margin-bottom:0.5rem; flex-wrap:wrap;}
 button.action-btn { background:none; border:none; cursor:pointer; color:#333; font-weight:bold; }
 button.action-btn:hover { text-decoration:underline; }
 .comments { padding-left:1rem; border-left:2px dotted #333; margin-top:0.5rem; }
 .comment { margin-bottom:0.5rem; padding:0.3rem 0.5rem; border-radius:8px; font-size:0.9rem; background:#d0f0fd; }
 .collapse-toggle { cursor:pointer; color:#007bff; font-weight:bold; margin-left:5px; }
 .reply-box { background:#a0e0f0; padding:0.5rem; border-radius:10px; margin-top:0.5rem; }
+#trashScreen { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:white; overflow:auto; z-index:1000; padding:2rem; }
+#trashScreen h2 { text-align:center; margin-bottom:2rem; }
+#backBtn { cursor:pointer; color:#0af; margin-bottom:1rem; display:inline-block; }
 </style>
 </head>
 <body>
@@ -43,26 +53,32 @@ button.action-btn:hover { text-decoration:underline; }
 
 <main>
   <div class="tabs">
-    <button class="tab-btn active sun" data-tab="sun">☀ 太阳</button>
-    <button class="tab-btn star" data-tab="star">⭐ 星星</button>
+    <button class="tab-btn star active" data-tab="star">⭐ 星星</button>
+    <button class="tab-btn sun" data-tab="sun">☀ 太阳</button>
     <button class="tab-btn moon" data-tab="moon">🌙 月亮</button>
+    <span id="trashBtn">🗑</span>
   </div>
 
-  <input type="text" id="searchBox" placeholder="搜索公共星星论坛帖子...">
+  <input type="text" id="searchBox" placeholder="你想找到什么呢? 😄">
 
   <section class="new-post">
-    <textarea id="postContent" placeholder="说点什么吧..."></textarea>
+    <textarea id="postContent" placeholder="你想说点什么呢？"></textarea>
     <button id="postBtn">发表</button>
   </section>
 
   <section id="posts" class="posts"></section>
 </main>
 
+<section id="trashScreen">
+  <h2>我们都是被抛弃的</h2>
+  <span id="backBtn">⬅ 返回论坛</span>
+  <div id="trashContent"></div>
+</section>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, runTransaction, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-// Firebase 配置
 const firebaseConfig = {
   apiKey: "AIzaSyCsTIliAHbe2__LVrUkJyezY3JsNf79cAM",
   authDomain: "apoiwnd.firebaseapp.com",
@@ -77,13 +93,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let currentTab = '';
+let currentTab = 'star';
+let currentUser = '';
 const postsContainer = document.getElementById('posts');
 const postBtn = document.getElementById('postBtn');
 const postContent = document.getElementById('postContent');
 const tabButtons = document.querySelectorAll('.tab-btn');
 const searchBox = document.getElementById('searchBox');
-let currentUser = '';
+const trashScreen = document.getElementById('trashScreen');
+const trashContent = document.getElementById('trashContent');
+const trashBtn = document.getElementById('trashBtn');
+const backBtn = document.getElementById('backBtn');
 
 function login(tab){
   if(tab==='sun'){
@@ -94,49 +114,60 @@ function login(tab){
     const pw = prompt("请输入月亮模块密码：");
     if(pw !== "月亮"){ alert("密码错误"); return false; }
   }
-  currentUser = prompt("请输入你的昵称（用于删除权限）：","匿名");
+  currentUser = prompt("请输入昵称（用于删除权限）","匿名");
   return true;
 }
 
 function updateBackground(){
-  if(currentTab==='sun'){ document.body.style.background = "linear-gradient(135deg,#ff5722,#ffeb3b)"; }
-  else if(currentTab==='moon'){ document.body.style.background = "linear-gradient(135deg,#00bcd4,#8bc34a)"; }
-  else if(currentTab==='star'){ document.body.style.background = "linear-gradient(135deg,#add8e6,#ffcccc)"; }
+  if(currentTab==='sun'){ document.body.style.background = "linear-gradient(135deg,#ff5722,#ffeb3b)"; searchBox.style.display='none'; }
+  else if(currentTab==='moon'){ document.body.style.background = "linear-gradient(135deg,#00bcd4,#8bc34a)"; searchBox.style.display='none'; }
+  else if(currentTab==='star'){ document.body.style.background = "linear-gradient(135deg,#add8e6,#ffcccc)"; searchBox.style.display='block'; }
 }
+updateBackground();
 
 tabButtons.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     if(btn.dataset.tab!=='star' && !login(btn.dataset.tab)) return;
     tabButtons.forEach(b=>b.classList.remove('active','sun','moon','star'));
-    btn.classList.add('active',btn.dataset.tab);
+    btn.classList.add('active', btn.dataset.tab);
     currentTab = btn.dataset.tab;
+    trashScreen.style.display='none';
     updateBackground();
   });
 });
 
+trashBtn.addEventListener('click', ()=>{
+  trashScreen.style.display='block';
+  updateTrash();
+});
+
+backBtn.addEventListener('click', ()=>{
+  trashScreen.style.display='none';
+});
+
 function renderPosts(postsData){
-  postsContainer.innerHTML = '';
-  let filtered = Object.entries(postsData||{}).filter(([id,post])=>post.tab===currentTab);
-  if(currentTab==='star' && searchBox.value) {
+  postsContainer.innerHTML='';
+  let filtered = Object.entries(postsData||{}).filter(([id,post])=>post.tab===currentTab && !post.deleted);
+  if(currentTab==='star' && searchBox.value){
     filtered = filtered.filter(([id,post])=>post.content.includes(searchBox.value));
   }
-  let postCount = 0;
+  let postCount=0;
   filtered.forEach(([id,post])=>{
     postCount++;
-    const postEl = document.createElement('div'); postEl.className='post';
-    let contentHTML = post.content;
+    const postEl=document.createElement('div'); postEl.className='post';
+    let contentHTML=post.content;
     if(contentHTML.length>200){
-      const shortText = contentHTML.substring(0,200)+'...';
-      contentHTML = `<span class="short-text">${shortText}</span><span class="full-text" style="display:none;">${post.content}</span><span class="collapse-toggle" onclick="toggleText(this)">▶</span>`;
+      const shortText=contentHTML.substring(0,200)+'...';
+      contentHTML=`<span class="short-text">${shortText}</span><span class="full-text" style="display:none;">${post.content}</span><span class="collapse-toggle" onclick="toggleText(this)">▶</span>`;
     }
     let commentsHTML='';
     if(post.comments){
       commentsHTML='<div class="comments">';
       post.comments.forEach((c,i)=>{
-        let cContent = c.content;
+        let cContent=c.content;
         if(cContent.length>150){
-          const shortC = cContent.substring(0,150)+'...';
-          cContent = `<span class="short-text">${shortC}</span><span class="full-text" style="display:none;">${c.content}</span><span class="collapse-toggle" onclick="toggleText(this)">▶</span>`;
+          const shortC=cContent.substring(0,150)+'...';
+          cContent=`<span class="short-text">${shortC}</span><span class="full-text" style="display:none;">${c.content}</span><span class="collapse-toggle" onclick="toggleText(this)">▶</span>`;
         }
         commentsHTML+=`<div class="comment"><strong>${i+1}l</strong> ${cContent} <button onclick="replyComment('${id}',${i})">回复</button></div>`;
         if(c.replies){
@@ -152,7 +183,21 @@ function renderPosts(postsData){
     postEl.innerHTML=`<div class="post-content"><strong>${postCount}L</strong> ${contentHTML}</div><div class="post-info">发表时间: ${post.time}</div><div class="post-actions"><button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button> ${deleteBtn}</div>${commentsHTML}`;
     postsContainer.prepend(postEl);
   });
-  if(postsContainer.firstChild) postsContainer.firstChild.scrollIntoView({behavior:'smooth'});
+}
+
+function updateTrash(){
+  trashContent.innerHTML='';
+  onValue(ref(db,'posts'),snapshot=>{
+    const data=snapshot.val()||{};
+    Object.entries(data).forEach(([id,post])=>{
+      if(post.deleted && post.tab===currentTab){
+        const postEl = document.createElement('div');
+        postEl.className='post';
+        postEl.innerHTML=`<div class="post-content"><strong>${post.floor || ''}L</strong> ${post.content}</div><div class="post-info">发表时间: ${post.time}</div>`;
+        trashContent.appendChild(postEl);
+      }
+    });
+  });
 }
 
 onValue(ref(db,'posts'),snapshot=>{const data=snapshot.val()||{}; renderPosts(data);});
@@ -177,9 +222,7 @@ window.replyComment=function(postId,commentIndex){
   runTransaction(ref(db,`posts/${postId}/comments/${commentIndex}/replies`),r=>{r=r||[]; r.push(replyText); return r;});
 }
 window.toggleText=function(el){ const parent=el.parentElement; const shortText=parent.querySelector('.short-text'); const fullText=parent.querySelector('.full-text'); if(shortText.style.display==="none"){shortText.style.display=""; fullText.style.display="none"; el.textContent="▶";}else{shortText.style.display="none"; fullText.style.display=""; el.textContent="▼";}}
-window.deletePost=function(postId){ 
-  runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true);
-}
+window.deletePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true);}
 searchBox.addEventListener('input',()=>{onValue(ref(db,'posts'),snapshot=>{const data=snapshot.val()||{}; renderPosts(data);});});
 </script>
 
