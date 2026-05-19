@@ -11,6 +11,7 @@ header .flowers-top, header .flowers-bottom { display:flex; justify-content:cent
 header .flowers-top span, header .flowers-bottom span { margin:0 2px; }
 header h1 { font-size:3rem; margin:0.5rem 0; color:#fff; text-shadow:1px 1px 4px #333; }
 header p { font-size:1rem; color:#ffeb3b; margin-top:0.3rem; cursor:pointer; }
+#loginMessage { color:red; display:block; margin-top:5px; font-weight:bold; }
 @media (max-width:600px){
   header h1 { font-size:2rem; }
   header p { font-size:0.9rem; }
@@ -49,8 +50,9 @@ button.action-btn:hover { text-decoration:underline; }
   <div class="flowers-top">
     <span>🌸</span><span>🌺</span><span>🌼</span><span>🌷</span><span>🌹</span>
   </div>
-  <h1>飛常論壇</h1>
+  <h1>非常論壇</h1>
   <p id="apoiwndBtn">APOIWND</p>
+  <span id="loginMessage"></span>
   <div class="flowers-bottom">
     <span>🌸</span><span>🌺</span><span>🌼</span><span>🌷</span><span>🌹</span>
   </div>
@@ -101,6 +103,7 @@ const db = getDatabase(app);
 let currentTab = 'star';
 let currentUser = '';
 let isAdmin = false;
+let isTrashAdmin = false;
 const postsContainer = document.getElementById('posts');
 const postBtn = document.getElementById('postBtn');
 const postContent = document.getElementById('postContent');
@@ -111,25 +114,35 @@ const trashContent = document.getElementById('trashContent');
 const trashBtn = document.getElementById('trashBtn');
 const backBtn = document.getElementById('backBtn');
 const apoiwndBtn = document.getElementById('apoiwndBtn');
+const loginMessage = document.getElementById('loginMessage');
 
 apoiwndBtn.addEventListener('click', ()=>{
     const pwd = prompt("请输入超级管理员密码：");
     if(pwd === "94084vzjj"){
         alert("已获得超级权限，可删除所有帖子！");
         isAdmin = true;
+        isTrashAdmin = true;
+        renderTrash();
     } else {
         alert("密码错误，无法获得权限。");
     }
 });
 
 function login(tab){
+  loginMessage.textContent = '';
   if(tab==='sun'){
     const pw = prompt("请输入太阳模块密码：");
-    if(pw !== "太阳"){ alert("密码错误"); return false; }
+    if(pw !== "太阳"){
+        loginMessage.textContent = "表象即是启示";
+        return false;
+    }
   }
   if(tab==='moon'){
     const pw = prompt("请输入月亮模块密码：");
-    if(pw !== "月亮"){ alert("密码错误"); return false; }
+    if(pw !== "月亮"){
+        loginMessage.textContent = "表象即是启示";
+        return false;
+    }
   }
   currentUser = prompt("请输入昵称（用于删除权限）","匿名");
   return true;
@@ -197,7 +210,10 @@ function renderPosts(postsData){
     }
     let deleteBtn='';
     if(isAdmin || post.user===currentUser) deleteBtn=`<button onclick="deletePost('${id}')">删除</button>`;
-    postEl.innerHTML=`<div class="post-content"><strong>${postCount}L</strong> ${contentHTML}</div><div class="post-info">发表时间: ${post.time}</div><div class="post-actions"><button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button> ${deleteBtn}</div>${commentsHTML}`;
+    postEl.innerHTML=`<div class="post-content"><strong>${postCount}L</strong> ${contentHTML}</div>
+                       <div class="post-info">发表时间: ${post.time}</div>
+                       <div class="post-actions"><button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button> ${deleteBtn}</div>
+                       ${commentsHTML}`;
     postsContainer.prepend(postEl);
   });
 }
@@ -210,7 +226,13 @@ function updateTrash(){
       if(post.deleted && post.tab===currentTab){
         const postEl = document.createElement('div');
         postEl.className='post';
-        postEl.innerHTML=`<div class="post-content"><strong>${post.floor || ''}L</strong> ${post.content}</div><div class="post-info">发表时间: ${post.time}</div>`;
+        let deleteBtn = '';
+        if(isTrashAdmin){
+            deleteBtn = `<button onclick="deletePost('${id}')">删除</button>`;
+        }
+        postEl.innerHTML=`<div class="post-content"><strong>${post.floor || ''}L</strong> ${post.content}</div>
+                           <div class="post-info">发表时间: ${post.time}</div>
+                           <div class="post-actions">${deleteBtn}</div>`;
         trashContent.appendChild(postEl);
       }
     });
