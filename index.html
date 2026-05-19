@@ -12,22 +12,24 @@ header .flowers-top span, header .flowers-bottom span { margin:0 2px; }
 header h1 { font-size:3rem; color:#fff; text-shadow:1px 1px 4px #333; margin:0.5rem 0; }
 header p { font-size:1rem; color:#ffeb3b; cursor:pointer; margin-top:0.3rem; }
 #bookBtn { display:none; cursor:pointer; font-size:1.5rem; margin-left:10px; }
-.module-title { writing-mode: vertical-rl; font-weight:bold; font-size:1.5rem; text-align:center; margin:1rem 0; display:none; }
-.star-title { color: blue; }
-.sun-title { color: red; }
-.moon-title { color: yellow; }
+.module-title { writing-mode: vertical-rl; font-weight:bold; font-size:1.5rem; text-align:center; margin:1rem 0; display:none;}
+.star-title { color: #7b68ee; } /* 蓝紫色 */
+.sun-title { color: red; } 
+.moon-title { color: #b8860b; } /* 深黄色 */
 .tabs { display:flex; gap:1rem; justify-content:center; margin-bottom:1rem; flex-wrap:wrap; }
-.tab-btn { padding:0.5rem 1rem; cursor:pointer; border-radius:8px; border:none; font-weight:bold; color:white; }
-.tab-btn.active.star { background-color:#6a5acd; }
-.tab-btn.active.sun { background-color:#ff5722; }
-.tab-btn.active.moon { background-color:#00bcd4; }
+.tab-btn { padding:0.5rem 1rem; cursor:pointer; border-radius:8px; border:none; font-weight:bold; color:white; font-size:1.5rem;}
+.tab-btn.active.star { background-color:#a0c4ff; } /* 星星浅蓝 */
+.tab-btn.active.sun { background: linear-gradient(135deg,#ff5722,#ffeb3b);} /* 太阳红黄 */
+.tab-btn.active.moon { background: linear-gradient(135deg,#32cd32,#ffa500);} /* 月亮绿橙 */
 #trashBtn { cursor:pointer; font-size:1.2rem; margin-left:0.5rem; }
 #searchBox { width:100%; padding:0.5rem; border-radius:10px; border:2px solid #ccc; margin-bottom:1rem; color:#555; }
 #searchBox::placeholder { color:#aaa; }
-.new-post textarea { width:100%; height:80px; padding:0.5rem; border-radius:10px; border:2px solid #fff; resize:none; margin-bottom:0.5rem; background:rgba(255,255,255,0.85); }
-.new-post button { padding:0.5rem 1rem; border:none; border-radius:10px; background-color:#ff9800; color:white; font-weight:bold; cursor:pointer; }
+.new-post textarea { width:100%; height:80px; padding:0.5rem; border-radius:10px; border:2px solid #fff; resize:none; margin-bottom:0.5rem; background:rgba(255,255,255,0.85);}
+.new-post textarea::placeholder { color:#666; }
+.new-post button { padding:0.5rem 1rem; border:none; border-radius:10px; background-color:#ffa07a; color:white; font-weight:bold; cursor:pointer;} /* 无病呻吟橙 */
+.new-post button:hover { background-color:#ff8c00; }
 .posts { margin-top:1rem; }
-.post { background: rgba(255,255,255,0.85); border-radius:15px; padding:1rem; margin-top:1rem; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+.post { background: rgba(255,255,255,0.85); border-radius:15px; padding:1rem; margin-top:1rem; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
 .post.self { background: purple; color:white; }
 .post-content { margin-bottom:0.5rem; white-space:pre-wrap; }
 .post-info { font-size:0.8rem; color:#555; margin-bottom:0.5rem; }
@@ -54,9 +56,9 @@ button.action-btn { background:none; border:none; cursor:pointer; color:#333; fo
 <main>
   <input type="text" id="searchBox" placeholder="你想回忆什么？🤷‍♂️">
   <div class="tabs">
-    <button class="tab-btn star" data-tab="star">⭐ </button>
-    <button class="tab-btn sun" data-tab="sun">☀ </button>
-    <button class="tab-btn moon" data-tab="moon">🌙 </button>
+    <button class="tab-btn star" data-tab="star">⭐</button>
+    <button class="tab-btn sun" data-tab="sun">☀</button>
+    <button class="tab-btn moon" data-tab="moon">🌙</button>
     <span id="trashBtn">🗑</span>
   </div>
 
@@ -65,7 +67,7 @@ button.action-btn { background:none; border:none; cursor:pointer; color:#333; fo
   <section class="module-title moon-title" id="moonTitle">鸟儿在歌唱</section>
 
   <section class="new-post">
-    <textarea id="postContent" placeholder="请输入内容..."></textarea>
+    <textarea id="postContent" placeholder="大狗叫叫叫"></textarea>
     <button id="postBtn">无病呻吟</button>
   </section>
 
@@ -111,9 +113,13 @@ const sunTitle = document.getElementById('sunTitle');
 const moonTitle = document.getElementById('moonTitle');
 const apoiwndBtn = document.getElementById('apoiwndBtn');
 const bookBtn = document.getElementById('bookBtn');
+const trashBtn = document.getElementById('trashBtn');
+const trashScreen = document.getElementById('trashScreen');
+const trashContent = document.getElementById('trashContent');
 
 let lastData={};
 
+// 超级管理员权限
 apoiwndBtn.addEventListener('click',()=>{
     const pwd = prompt("请输入超级管理员密码：");
     if(pwd==="94084vzjj"){ isAdmin=true; localStorage.setItem('isAdmin',true); bookBtn.style.display='inline-block'; alert("已获得管理员权限"); } 
@@ -134,24 +140,59 @@ tabButtons.forEach(btn=>{
     });
 });
 
+// 垃圾箱
+trashBtn.addEventListener('click',()=>{ 
+    trashScreen.style.display='block'; 
+    renderTrash(lastData);
+});
+document.getElementById('backBtn').addEventListener('click',()=>{ trashScreen.style.display='none'; });
+
 // Firebase 数据监听
 onValue(ref(db,'posts'),snapshot=>{
     lastData=snapshot.val()||{};
     renderPosts(lastData);
 });
 
-// 渲染帖子
 function renderPosts(data){
     postsContainer.innerHTML='';
-    let entries=Object.entries(data||{}).filter(([id,p])=>p.tab===currentTab);
+    let entries=Object.entries(data||{}).filter(([id,p])=>p.tab===currentTab && !p.deleted);
     entries.forEach(([id,post],index)=>{
         const div=document.createElement('div');
         div.className='post'+(post.user===currentUser?' self':'');
         div.innerHTML=`<div class="post-content"><strong>${index+1}L</strong> ${post.content}</div>
         <div class="post-info">发表时间: ${post.time}</div>
-        <div class="post-actions"><button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button>
-        ${(post.user===currentUser)?`<button onclick="deletePost('${id}')">删除</button>`:''}</div>`;
+        <div class="post-actions">
+        <button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button>
+        ${(post.user===currentUser)?`<button onclick="deletePost('${id}')">删除</button>`:''}
+        <button class="action-btn" onclick="replyPost('${id}')">回复</button>
+        </div>`;
+        // 评论
+        if(post.comments){
+            let commentsHTML='<div class="comments">';
+            post.comments.forEach((c,i)=>{
+                commentsHTML+=`<div class="comment"><strong>${i+1}l</strong> ${c.content} <button onclick="replyComment('${id}',${i})">回复</button></div>`;
+                if(c.replies){
+                    commentsHTML+='<div class="comments">';
+                    c.replies.forEach((r,j)=>{ commentsHTML+=`<div class="comment"><strong>${j+1}l</strong> ${r}</div>`; });
+                    commentsHTML+='</div>';
+                }
+            });
+            commentsHTML+='</div>';
+            div.innerHTML+=commentsHTML;
+        }
         postsContainer.prepend(div);
+    });
+}
+
+function renderTrash(data){
+    trashContent.innerHTML='';
+    let entries=Object.entries(data||{}).filter(([id,p])=>p.deleted);
+    entries.forEach(([id,post])=>{
+        const div=document.createElement('div');
+        div.className='post';
+        div.innerHTML=`<div class="post-content"><strong>${post.tab}模块</strong> ${post.content}</div>
+        <div class="post-info">发表时间: ${post.time}</div>`;
+        trashContent.prepend(div);
     });
 }
 
@@ -160,14 +201,25 @@ document.getElementById('postBtn').addEventListener('click',()=>{
     const content=document.getElementById('postContent').value.trim();
     if(!content) return;
     const timeStr=new Date().toLocaleString();
-    push(ref(db,'posts'),{tab:currentTab||'star',content,likes:0,comments:[],time:timeStr,user:currentUser});
+    push(ref(db,'posts'),{tab:currentTab||'star',content,likes:0,comments:[],time:timeStr,user:currentUser,deleted:false});
     document.getElementById('postContent').value='';
 });
 
-// 点赞与删除
+// 点赞、删除、回复
 window.likePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/likes'),likes=>(likes||0)+1); }
 window.deletePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true); }
 
+window.replyPost=function(postId){
+    const text=prompt("请输入回复：");
+    if(!text) return;
+    runTransaction(ref(db,`posts/${postId}/comments`),old=>{ old=old||[]; old.push({content:text,user:currentUser,replies:[]}); return old; });
+}
+window.replyComment=function(postId,index){
+    const text=prompt("请输入回复：");
+    if(!text) return;
+    runTransaction(ref(db,`posts/${postId}/comments/${index}/replies`),old=>{ old=old||[]; old.push(text); return old; });
+}
 </script>
+
 </body>
 </html>
