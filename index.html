@@ -12,6 +12,11 @@ header .flowers-top span, header .flowers-bottom span { margin:0 2px; }
 header h1 { font-size:3rem; margin:0.5rem 0; color:#fff; text-shadow:1px 1px 4px #333; }
 header p { font-size:1rem; color:#ffeb3b; margin-top:0.3rem; cursor:pointer; }
 #loginMessage { color:red; display:block; margin-top:5px; font-weight:bold; }
+#bookBtn { display:none; cursor:pointer; font-size:1.5rem; margin-left:10px; }
+#adminNotice { display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%);
+    background: yellow; color: red; padding: 1.5rem; border-radius: 10px; font-weight:bold; text-align:center;
+    z-index:2000; font-size:1.2rem; font-family: 'Arial', sans-serif; }
+#closeNotice { cursor:pointer; margin-left:10px; }
 @media (max-width:600px){
   header h1 { font-size:2rem; }
   header p { font-size:0.9rem; }
@@ -52,6 +57,7 @@ button.action-btn:hover { text-decoration:underline; }
   </div>
   <h1>非常論壇</h1>
   <p id="apoiwndBtn">APOIWND</p>
+  <span id="bookBtn">📖</span>
   <span id="loginMessage"></span>
   <div class="flowers-bottom">
     <span>🌸</span><span>🌺</span><span>🌼</span><span>🌷</span><span>🌹</span>
@@ -81,6 +87,12 @@ button.action-btn:hover { text-decoration:underline; }
   <span id="backBtn">⬅ 返回论坛</span>
   <div id="trashContent"></div>
 </section>
+
+<!-- 超级管理员公告弹窗 -->
+<div id="adminNotice">
+  <span id="noticeText">超级管理员公告</span>
+  <span id="closeNotice">❌</span>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -115,19 +127,44 @@ const trashBtn = document.getElementById('trashBtn');
 const backBtn = document.getElementById('backBtn');
 const apoiwndBtn = document.getElementById('apoiwndBtn');
 const loginMessage = document.getElementById('loginMessage');
+const bookBtn = document.getElementById('bookBtn');
+const adminNotice = document.getElementById('adminNotice');
+const noticeText = document.getElementById('noticeText');
+const closeNotice = document.getElementById('closeNotice');
 
+let lastNoticeDate = localStorage.getItem('adminNoticeDate');
+const today = new Date().toDateString();
+
+// 超级管理员登录
 apoiwndBtn.addEventListener('click', ()=>{
     const pwd = prompt("请输入超级管理员密码：");
     if(pwd === "94084vzjj"){
-        alert("已获得超级权限，可删除所有帖子！");
+        alert("已获得超级权限！");
         isAdmin = true;
         isTrashAdmin = true;
-        renderTrash();
+        bookBtn.style.display = 'inline-block';
+        showAdminNotice("今天的管理员公告！");
     } else {
-        alert("密码错误，无法获得权限。");
+        alert("密码错误！");
     }
 });
 
+// 点击书本图标弹窗
+bookBtn.addEventListener('click', ()=>{ showAdminNotice("今天的管理员公告！"); });
+
+closeNotice.addEventListener('click', ()=>{ adminNotice.style.display='none'; });
+
+// 弹窗函数
+function showAdminNotice(text){
+    if(lastNoticeDate !== today){
+        noticeText.textContent = text;
+        adminNotice.style.display = 'block';
+        localStorage.setItem('adminNoticeDate', today);
+        lastNoticeDate = today;
+    }
+}
+
+// 登录模块
 function login(tab){
   loginMessage.textContent = '';
   if(tab==='sun'){
@@ -148,6 +185,7 @@ function login(tab){
   return true;
 }
 
+// 背景切换
 function updateBackground(){
   if(currentTab==='sun'){ document.body.style.background = "linear-gradient(135deg,#ff5722,#ffeb3b)"; searchBox.style.display='none'; }
   else if(currentTab==='moon'){ document.body.style.background = "linear-gradient(135deg,#00bcd4,#8bc34a)"; searchBox.style.display='none'; }
@@ -166,15 +204,10 @@ tabButtons.forEach(btn=>{
   });
 });
 
-trashBtn.addEventListener('click', ()=>{
-  trashScreen.style.display='block';
-  updateTrash();
-});
+trashBtn.addEventListener('click', ()=>{ trashScreen.style.display='block'; updateTrash(); });
+backBtn.addEventListener('click', ()=>{ trashScreen.style.display='none'; });
 
-backBtn.addEventListener('click', ()=>{
-  trashScreen.style.display='none';
-});
-
+// 渲染帖子
 function renderPosts(postsData){
   postsContainer.innerHTML='';
   let filtered = Object.entries(postsData||{}).filter(([id,post])=>post.tab===currentTab && !post.deleted);
@@ -218,6 +251,7 @@ function renderPosts(postsData){
   });
 }
 
+// 渲染垃圾箱
 function updateTrash(){
   trashContent.innerHTML='';
   onValue(ref(db,'posts'),snapshot=>{
@@ -249,14 +283,15 @@ postBtn.addEventListener('click',()=>{
   postContent.value='';
 });
 
+// 公共函数
 window.likePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/likes'),likes=>(likes||0)+1); }
 window.commentPost=function(postId){ 
-  const commentText = prompt("汪汪汪："); 
+  const commentText = prompt("请输入你的评论："); 
   if(!commentText) return;
   runTransaction(ref(db,'posts/'+postId+'/comments'),c=>{c=c||[]; c.push({content:commentText,replies:[],user:currentUser}); return c;});
 }
 window.replyComment=function(postId,commentIndex){
-  const replyText=prompt("喵喵喵：");
+  const replyText=prompt("回复该评论：");
   if(!replyText) return;
   runTransaction(ref(db,`posts/${postId}/comments/${commentIndex}/replies`),r=>{r=r||[]; r.push(replyText); return r;});
 }
