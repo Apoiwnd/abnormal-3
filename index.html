@@ -1,145 +1,72 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>
-   Apoiwnd
-  珍藏  网站</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>非常论坛</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-background:#fff8d9;
-color:#1e5631;
-font-family:微软雅黑,宋体;
-font-size:19px;
-line-height:2.6;
-padding:40px 35px;
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei", serif;
+  background: linear-gradient(135deg, #3b2416, #6d4c2f);
+  color: #f5e6c8;
 }
-h1{
-text-align:center;
-margin-bottom:45px;
-font-size:32px;
+.header {
+  background: rgba(60, 30, 10, 0.9);
+  padding: 20px;
+  text-align: center;
+  font-size: 32px;
+  font-weight: bold;
+  border-bottom: 4px solid #c89b5b;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
 }
-h2{
-margin:30px 0 15px;
-padding-bottom:6px;
-border-bottom:1px solid #ccc;
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
 }
-a{
-color:#1e5631;
-text-decoration:none;
+.card {
+  background: rgba(255, 248, 220, 0.08);
+  border: 2px solid #c89b5b;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
-a:hover{
-text-decoration:underline;
+textarea, input {
+  width: 100%; box-sizing: border-box;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #c89b5b;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 16px;
 }
+button {
+  background: linear-gradient(180deg, #d4a45f, #8b5a2b);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-right: 10px;
+  font-size: 14px;
+}
+button:hover { transform: scale(1.03); }
+.post-title { font-size: 24px; font-weight: bold; cursor: pointer; }
+.post-content { margin: 10px 0; white-space: pre-wrap; }
+.actions { margin-top: 10px; }
+.comment {
+  background: rgba(255,255,255,0.06);
+  border-left: 3px solid #d4a45f;
+  padding: 8px 12px;
+  margin-top: 8px;
+  border-radius: 6px;
+}
+.hidden { display: none; }
+.back-btn { margin-bottom: 20px; }
 </style>
 </head>
 <body>
-
-<h1>我的私人网站收藏大全</h1>
-
-<h2>📖 看书小说藏书</h2>
-天涯书库 占星术：<a href="https://tianyashuku.net/world/2118/191446.html">点击进入</a><br>
-九九藏书网 名著合集：<a href="https://www.99csw.com">点击进入</a><br>
-新新漫画：<a href="https://www.77mh.nl/">点击进入</a><br>
-笔趣阁：<a href="shturl.cc/x5vz9VOBVy2g">点击进入</a><br>
-松书屋找书：<a href="https://onlinetoolsland.com/">点击进入</a><br>
-libgen书籍库：<a href="https://www.bgrdh.com/sites/23943.html">点击进入</a><br>
-精品资源汇总：<a href="https://www.webhub123.com/">点击进入</a><br>
-Zlibrary神站：<a href="https://zh.z-lib.fm/">点击进入</a>
-
-<h2>🎨 绘画素材&动作参考</h2>
-面孔表情绘画参考：<a href="https://line-of-action.com/practice-tools/face-expression-practice">点击进入</a><br>
-艺术作品素材：<a href="https://artvee.com/">点击进入</a><br>
-美叶艺术参考：<a href="https://www.meiye.art/">点击进入</a><br>
-30秒即兴绘画练习：<a href="https://www.posemaniacs.com/tools/thirtyseconds">点击进入</a><br>
-快速姿势练习：<a href="https://quickposes.com/en/gestures/timed">点击进入</a><br>
-Scott人体动作绘画：<a href="www.bodiesinmotion.photo">点击进入</a><br>
-时尚绘画素材：<a href="https://styledumonde.com/">点击进入</a><br>
-叙事风格插画：<a href="http://moritz-jendral.de/portfolio-item/vampire-live-2018-blut-und-spiele/">点击进入</a><br>
-简易绘画教程：<a href="http://www.artgraphica.net/free-art-lessons/free-art-tutorials.htm">点击进入</a>
-
-<h2>🌿 动植物自然观察</h2>
-全球动植物观察：<a href="https://www.inaturalist.org/observations">点击进入</a><br>
-微观昆虫细节：<a href="http://microsculpture.net/">点击进入</a><br>
-鸟类百科资料库：<a href="https://avibase.bsc-eoc.org/avibase.jsp?lang=EN">点击进入</a><br>
-爬行动物数据库：<a href="https://reptile-database.reptarium.cz/">点击进入</a>
-
-<h2>🎵 音乐钢琴娱乐</h2>
-自由键盘钢琴：<a href="https://www.autopiano.cn/">点击进入</a><br>
-重金属摇滚电台：<a href="https://www.rockradio.com/heavymetal">点击进入</a><br>
-*声 Spotify：<a href="https://open.spotify.com/">点击进入（需翻墙）</a>
-
-<h2>🍳 生活工具实用网站</h2>
-香哈网美食做菜教程：<a href="https://www.xiangha.com/">点击进入</a><br>
-轻松传 手机电脑互传文件：<a href="https://easychuan.cn/">点击进入</a><br>
-录音变声工具：<a href="https://voicechanger.io/">点击进入</a><br>
-人声分离录制：<a href="https://vocalremover.org/zh/voice-recorder">点击进入</a><br>
-QQ邮箱：<a href="https://mail.qq.com/">点击进入</a><br>
-高级全球实时天气：<a href="https://www.ventusky.com/">点击进入</a><br>
-3D全球风景全景：<a href="https://www.airpano.com/">点击进入</a><br>
-故宫3D全景游览：<a href="https://pano.dpm.org.cn/#/">点击进入</a><br>
-健身肌肉动作教程：<a href="https://musclewiki.com/zh-cn">点击进入</a><br>
-ssgo阿里云盘资源搜索：<a href="https://ssgo.app">点击进入</a><br>
-视频在线下载工具：<a href="https://downloader.bhwa233.com/zh">点击进入</a><br>
-油管通用下载：<a href="https://cobalt.meowing.de/">点击进入</a>
-
-<h2>📜 古文诗词文案句子</h2>
-古诗文网古文岛：<a href="https://www.gushiwen.cn/">点击进入</a><br>
-中华诗库检索：<a href="www.shiku.org">点击进入</a><br>
-据意查句文案大全：<a href="https://wantquotes.net/">点击进入</a><br>
-深言达意高级文案：<a href="https://www.shenyandayi.com/">点击进入</a><br>
-句子精华提取：<a href="https://lingowhale.com">点击进入</a>
-
-<h2>📚 外语学习打字台词</h2>
-英文打字练习：<a href="https://www.typelit.io/">点击进入</a><br>
-编程打字修炼场：<a href="https://www.biancheng.love/typinghome">点击进入</a><br>
-日语官方学习：<a href="https://www3.nhk.or.jp/nhkworld/lesson/zh/">点击进入</a><br>
-英语每日学习：<a href="https://engoo.com/app/materials/en">点击进入</a><br>
-影视剧台词口语检索：<a href="https://www.playphrase.me/#/">点击进入</a>
-
-<h2>🎮 游戏合集游玩</h2>
-i wanna系列游戏站：<a href="https://delicious-fruit.com/">点击进入</a><br>
-在线小游戏大全：<a href="https://poki.com/zh/">点击进入</a><br>
-国际象棋在线对战：<a href="https://lichess.org/">点击进入</a><br>
-国外独立小游戏下载：<a href="shturl.cc/9eo5jH6u0rq">点击进入（需翻墙）</a>
-
-<h2>📺 影视动漫追剧</h2>
-freeOK免费看剧：<a href="http://www.tahcjn.com/">点击进入</a><br>
-age动漫番剧合集：<a href="https://www.agefans.la/">点击进入</a><br>
-老外原版无字幕电影：<a href="https://www.fmoviesto.lol/">点击进入（需翻墙）</a>
-
-<h2>🔍 资源导航搜索</h2>
-网飞猫超多软件资源：<a href="https://www.ncat1.app/">点击进入</a><br>
-Skr磁力种子搜索：<a href="skrbtvo.top">点击进入</a><br>
-0x3超强网站合集：<a href="https://0x3.com/">点击进入</a><br>
-开发者全能导航：<a href="https://codernav.com/">点击进入</a><br>
-白嫖合集网站：<a href="https://下次一定.cn/">点击进入</a>
-
-<h2>⚠️ 猎奇特殊网站</h2>
-血腥放松向素材：<a href="shturl.cc/8uPL5aQYCQhU4Q8JY">点击进入</a><br>
-最全猎奇合集：<a href="https://xxx.livegore.com/?start=16770">点击进入</a>
-
-<h2>🌐 外网论坛&同人文学【*需翻墙】</h2>
-外文网文平台 Wattpad：<a href="https://www.wattpad.com/home">需翻墙</a><br>
-谷歌艺术名画库：<a href="https://artsandculture.google.com/">需翻墙</a><br>
-tumblr社区：<a href="https://www.tumblr.com/">需翻墙</a><br>
-reddit外国贴吧：<a href="https://www.reddit.com/">需翻墙</a><br>
-AO3同人文库：<a href="https://archiveofourown.org/">需翻墙</a><br>
-po18小说站：<a href="https://www.po18.tw/">需翻墙</a><br>
-米国度原创文学：<a href="https://www.myrics.club/">部分需翻墙</a><br>
-亚马逊海外购物：<a href="https://www.amazon.co.uk/">需翻墙</a><br>
-Gmail邮箱：<a href="https://mail.google.com/mail">需翻墙</a><br>
-油管YouTube：<a href="https://www.youtube.com/">需翻墙</a><br>
-维基百科：<a href="https://www.wikipedia.org/">需翻墙</a><br>
-4chan论坛：<a href="https://www.4chan.org/">需翻墙</a><br>
-外文诗歌库：<a href="https://www.poetryfoundation.org/poems">需翻墙</a><br>
-时光机怀旧文献：<a href="https://web.archive.org/">需翻墙</a><br>
-quora外国知乎：<a href="https://www.quora.com/">需翻墙</a><br>
-TED英语演讲：<a href="https://www.ted.com/">需翻墙</a><br>
-mega漫画网盘：<a href="https://mega.nz/">需翻墙</a><br>
-GitHub开源资源：<a href="https://github.com/">加载较慢</a><br>
-全历史百科：<a href="https://www.allhistory.com/">国内可直进</a>
-
-</body>
 </html>
