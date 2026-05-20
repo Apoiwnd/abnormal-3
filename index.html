@@ -63,7 +63,7 @@ button.action-btn { background:none; border:none; cursor:pointer; color:#333; fo
 </header>
 
 <main>
-  <input type="text" id="searchBox" placeholder="你想回忆什么？🤷‍♀️🤣🤷‍♂️">
+  <input type="text" id="searchBox" placeholder="你想回忆什么？🤷‍♀️">
   <div class="tabs">
     <button class="tab-btn star" data-tab="star">⭐</button>
     <button class="tab-btn sun" data-tab="sun">☀</button>
@@ -227,8 +227,8 @@ function renderPosts(data){
         <div class="post-info">发表时间: ${post.time}</div>
         <div class="post-actions">
         <button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button>
-        ${(isAdmin)?`<button onclick="deletePost('${id}')">删除</button>`:''}
-        <button class="action-btn" onclick="replyPost('${id}')">回复</button>
+        ${(isAdmin)?`<button onclick="deletePost('${id}')">🚽</button>`:''}
+        <button class="action-btn" onclick="replyPost('${id}')">異議あり！</button>
         </div>`;
 
         // 评论
