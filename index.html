@@ -10,7 +10,7 @@ body {
     margin:0; 
     padding:0; 
     transition: background 0.3s; 
-    background: linear-gradient(135deg, #fffacd, #ccffcc); /* 浅黄色到浅绿色渐变 */
+    background: linear-gradient(135deg, #fffacd, #ccffcc);
 }
 header { text-align:center; padding:1rem 0; }
 header .flowers-top, header .flowers-bottom { display:flex; justify-content:center; flex-wrap:wrap; }
@@ -36,7 +36,7 @@ header p, #bookBtn { font-size:1rem; color:#ffeb3b; cursor:pointer; margin-top:0
 .new-post button:hover { background-color:#ff8c00; }
 .posts { margin-top:1rem; }
 .post { background: rgba(255,255,255,0.85); border-radius:15px; padding:1rem; margin-top:1rem; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-.post.self .post-content { color: purple; } /* 自己发帖文字紫色 */
+.post.self .post-content { color: purple; } 
 .post-content { margin-bottom:0.5rem; white-space:pre-wrap; }
 .post-info { font-size:0.8rem; color:#555; margin-bottom:0.5rem; }
 .post-actions { display:flex; gap:1rem; margin-bottom:0.5rem; flex-wrap:wrap; }
@@ -63,7 +63,7 @@ button.action-btn { background:none; border:none; cursor:pointer; color:#333; fo
 </header>
 
 <main>
-  <input type="text" id="searchBox" placeholder="你想回忆什么？🤷‍♂️">
+  <input type="text" id="searchBox" placeholder="你想回忆什么？🤷‍♀️🤣🤷‍♂️">
   <div class="tabs">
     <button class="tab-btn star" data-tab="star">⭐</button>
     <button class="tab-btn sun" data-tab="sun">☀</button>
@@ -89,11 +89,6 @@ button.action-btn { background:none; border:none; cursor:pointer; color:#333; fo
   <div id="trashContent"></div>
 </section>
 
-<div id="adminNotice">
-  <span id="noticeText">超级管理员公告</span>
-  <span id="closeNotice">❌</span>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
@@ -111,7 +106,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let currentTab = '';
-let currentUser = prompt("请输入昵称（匿名可留空）：")||"匿名";
+let currentUser = prompt("访问密码是 笨蛋：")||"匿名";
 let isAdmin = JSON.parse(localStorage.getItem('isAdmin')||'false');
 
 const postsContainer = document.getElementById('posts');
@@ -135,13 +130,7 @@ apoiwndBtn.addEventListener('click',()=>{
     else alert("密码错误");
 });
 
-bookBtn.addEventListener('click',()=>{
-    const postsArray = Object.values(lastData||{}).filter(p=>!p.deleted);
-    if(postsArray.length===0){ alert("当前没有帖子可随机显示"); return; }
-    const randIndex = Math.floor(Math.random()*postsArray.length);
-    alert("随机帖子: "+postsArray[randIndex].content);
-});
-
+// 模块切换
 tabButtons.forEach(btn=>{
     btn.addEventListener('click',()=>{
         currentTab=btn.dataset.tab;
@@ -155,17 +144,29 @@ tabButtons.forEach(btn=>{
     });
 });
 
+// 垃圾箱
 trashBtn.addEventListener('click',()=>{ 
     trashScreen.style.display='block'; 
     renderTrash(lastData);
 });
 document.getElementById('backBtn').addEventListener('click',()=>{ trashScreen.style.display='none'; });
 
+// Firebase 数据监听
 onValue(ref(db,'posts'),snapshot=>{
     lastData=snapshot.val()||{};
     renderPosts(lastData);
+    // 进入网页显示月亮模块随机帖
+    if(!window.shownMoonNotice){
+        window.shownMoonNotice=true;
+        const moonPosts = Object.values(lastData).filter(p=>p.tab==='moon' && !p.deleted);
+        if(moonPosts.length>0){
+            const rand = moonPosts[Math.floor(Math.random()*moonPosts.length)];
+            alert("月亮模块随机帖子: "+rand.content);
+        }
+    }
 });
 
+// 发帖
 document.getElementById('postBtn').addEventListener('click',()=>{
     const content=document.getElementById('postContent').value.trim();
     if(!content) return;
@@ -174,32 +175,35 @@ document.getElementById('postBtn').addEventListener('click',()=>{
     document.getElementById('postContent').value='';
 });
 
+// 点赞
 window.likePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/likes'),likes=>(likes||0)+1); }
-window.deletePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true); }
+
+// 删除仅管理员
+window.deletePost=function(postId){ if(!isAdmin) return; runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true); }
+
+// 回复帖子，最多两层
 window.replyPost=function(postId){
     const text=prompt("请输入回复：");
     if(!text) return;
-    runTransaction(ref(db,`posts/${postId}/comments`),old=>{ old=old||[]; old.push({content:text,user:currentUser,replies:[]}); return old; });
-}
-
-function renderPosts(data){
-    postsContainer.innerHTML='';
-    let entries=Object.entries(data||{}).filter(([id,p])=>p.tab===currentTab && !p.deleted);
-    entries.forEach(([id,post],index)=>{
-        const div=document.createElement('div');
-        div.className='post'+(post.user===currentUser?' self':'');
-        div.innerHTML=`<div class="post-content"><strong>${index+1}L</strong> ${formatContent(post.content, post.user===currentUser)}</div>
-        <div class="post-info">发表时间: ${post.time}</div>
-        <div class="post-actions">
-        <button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button>
-        ${(isAdmin || post.user===currentUser)?`<button onclick="deletePost('${id}')">删除</button>`:''}
-        <button class="action-btn" onclick="replyPost('${id}')">回复</button>
-        </div>`;
-        postsContainer.prepend(div);
+    runTransaction(ref(db,`posts/${postId}/comments`),old=>{
+        old=old||[];
+        old.push({content:text,user:currentUser,replies:[]});
+        return old;
     });
 }
 
-// 超过100字显示展开
+window.replyComment=function(postId,index){
+    const text=prompt("请输入回复：");
+    if(!text) return;
+    runTransaction(ref(db,`posts/${postId}/comments/${index}/replies`),old=>{
+        old=old||[];
+        if(old.length>=1) return old; // 只允许两层
+        old.push({content:text,user:currentUser});
+        return old;
+    });
+}
+
+// 展开文本
 function formatContent(text,isSelf){
     if(text.length<=100) return text;
     return `<span class="short-text">${text.slice(0,100)}</span><span class="full-text">${text.slice(100)}</span> <span class="expand-btn" onclick="toggleExpand(this)">展开</span>`;
@@ -212,6 +216,45 @@ window.toggleExpand=function(btn){
     btn.textContent = btn.textContent==='展开'?'收起':'展开';
 }
 
+// 渲染帖子
+function renderPosts(data){
+    postsContainer.innerHTML='';
+    let entries=Object.entries(data||{}).filter(([id,p])=>p.tab===currentTab && !p.deleted);
+    entries.forEach(([id,post],index)=>{
+        const div=document.createElement('div');
+        div.className='post'+(post.user===currentUser?' self':'');
+        div.innerHTML=`<div class="post-content"><strong>${index+1}L</strong> ${formatContent(post.content, post.user===currentUser)}</div>
+        <div class="post-info">发表时间: ${post.time}</div>
+        <div class="post-actions">
+        <button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button>
+        ${(isAdmin)?`<button onclick="deletePost('${id}')">删除</button>`:''}
+        <button class="action-btn" onclick="replyPost('${id}')">回复</button>
+        </div>`;
+
+        // 评论
+        if(post.comments){
+            let commentsHTML='<div class="comments">';
+            post.comments.forEach((c,i)=>{
+                const firstLayer = `<div class="comment"><strong>${i+1}l</strong> ${c.content} ${(isAdmin)?`<button onclick="deleteComment('${id}',${i})">删除</button>`:''} <button onclick="replyComment('${id}',${i})">回复</button></div>`;
+                commentsHTML+=firstLayer;
+                if(c.replies && c.replies.length>0){
+                    commentsHTML+='<div class="comments">';
+                    c.replies.forEach((r,j)=>{
+                        const content = r.content || r;
+                        commentsHTML+=`<div class="comment">${content} ${(isAdmin)?`<button onclick="deleteReply('${id}',${i},${j})">删除</button>`:''}</div>`;
+                    });
+                    commentsHTML+='</div>';
+                }
+            });
+            commentsHTML+='</div>';
+            div.innerHTML+=commentsHTML;
+        }
+
+        postsContainer.prepend(div);
+    });
+}
+
+// 垃圾箱
 function renderTrash(data){
     trashContent.innerHTML='';
     let entries=Object.entries(data||{}).filter(([id,p])=>p.deleted);
