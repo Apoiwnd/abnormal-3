@@ -220,7 +220,7 @@ function renderTrash(data){
         div.className='post';
         div.innerHTML=`<div class="post-content"><strong>${post.tab}模块</strong> ${post.content}</div>
         <div class="post-info">发表时间: ${post.time}</div>
-        ${(isAdmin)?`<button onclick="deletePost('${id}')">删除</button>`:''}`;
+        ${(isAdmin)?`<button onclick="deletePost('${id}')">滚</button>`:''}`;
         trashContent.prepend(div);
     });
 }
