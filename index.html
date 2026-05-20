@@ -35,20 +35,22 @@ header p, #bookBtn { font-size:1rem; color:#ffeb3b; cursor:pointer; margin-top:0
 .new-post button { padding:0.5rem 1rem; border:none; border-radius:10px; background-color:#ffa07a; color:white; font-weight:bold; cursor:pointer;} 
 .new-post button:hover { background-color:#ff8c00; }
 .posts { margin-top:1rem; }
-.post { background: rgba(255,255,255,0.85); border-radius:15px; padding:1rem; margin-top:1rem; box-shadow:0 2px 5px rgba(0,0,0,0.1); word-break: break-word; }
-.post.self { background: rgba(255,255,255,0.85); color: purple; }
+.post { background: rgba(255,255,255,0.85); border-radius:15px; padding:1rem; margin-top:1rem; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+.post.self .post-content { color: purple; } /* 自己发帖文字紫色 */
 .post-content { margin-bottom:0.5rem; white-space:pre-wrap; }
 .post-info { font-size:0.8rem; color:#555; margin-bottom:0.5rem; }
 .post-actions { display:flex; gap:1rem; margin-bottom:0.5rem; flex-wrap:wrap; }
 button.action-btn { background:none; border:none; cursor:pointer; color:#333; font-weight:bold; }
 .comments { padding-left:1rem; border-left:2px dotted #333; margin-top:0.5rem; }
-.comment { margin-bottom:0.5rem; padding:0.3rem 0.5rem; border-radius:8px; font-size:0.9rem; background:#d0f0fd; word-break: break-word; }
+.comment { margin-bottom:0.5rem; padding:0.3rem 0.5rem; border-radius:8px; font-size:0.9rem; background:#d0f0fd; }
 .reply-box { background:#a0e0f0; padding:0.5rem; border-radius:10px; margin-top:0.5rem; }
-.expand-btn { color:#0a0; cursor:pointer; font-weight:bold; margin-left:5px; }
 #trashScreen { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:white; overflow:auto; z-index:1000; padding:2rem; }
 #backBtn { cursor:pointer; color:#0af; margin-bottom:1rem; display:inline-block; }
 #adminNotice { display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:yellow; color:red; padding:1.5rem; border-radius:10px; font-weight:bold; text-align:center; z-index:2000; font-size:1.2rem; font-family:'Arial', sans-serif; }
 #closeNotice { cursor:pointer; margin-left:10px; }
+.expand-btn { color:#0a0; cursor:pointer; font-weight:bold; margin-left:5px; }
+.short-text{display:inline;}
+.full-text{display:none;}
 </style>
 </head>
 <body>
@@ -126,14 +128,13 @@ const trashContent = document.getElementById('trashContent');
 
 let lastData={};
 
-// APOIWND 超级管理员权限
+// 超级管理员权限
 apoiwndBtn.addEventListener('click',()=>{
     const pwd = prompt("请输入超级管理员密码：");
     if(pwd==="94084vzjj"){ isAdmin=true; localStorage.setItem('isAdmin',true); bookBtn.style.display='inline-block'; alert("已获得管理员权限"); } 
     else alert("密码错误");
 });
 
-// 📖 点击弹出随机帖子
 bookBtn.addEventListener('click',()=>{
     const postsArray = Object.values(lastData||{}).filter(p=>!p.deleted);
     if(postsArray.length===0){ alert("当前没有帖子可随机显示"); return; }
@@ -141,7 +142,6 @@ bookBtn.addEventListener('click',()=>{
     alert("随机帖子: "+postsArray[randIndex].content);
 });
 
-// 模块切换
 tabButtons.forEach(btn=>{
     btn.addEventListener('click',()=>{
         currentTab=btn.dataset.tab;
@@ -155,20 +155,17 @@ tabButtons.forEach(btn=>{
     });
 });
 
-// 垃圾箱
 trashBtn.addEventListener('click',()=>{ 
     trashScreen.style.display='block'; 
     renderTrash(lastData);
 });
 document.getElementById('backBtn').addEventListener('click',()=>{ trashScreen.style.display='none'; });
 
-// Firebase 数据监听
 onValue(ref(db,'posts'),snapshot=>{
     lastData=snapshot.val()||{};
     renderPosts(lastData);
 });
 
-// 发帖
 document.getElementById('postBtn').addEventListener('click',()=>{
     const content=document.getElementById('postContent').value.trim();
     if(!content) return;
@@ -177,7 +174,6 @@ document.getElementById('postBtn').addEventListener('click',()=>{
     document.getElementById('postContent').value='';
 });
 
-// 点赞、删除、回复
 window.likePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/likes'),likes=>(likes||0)+1); }
 window.deletePost=function(postId){ runTransaction(ref(db,'posts/'+postId+'/deleted'),()=>true); }
 window.replyPost=function(postId){
@@ -186,62 +182,34 @@ window.replyPost=function(postId){
     runTransaction(ref(db,`posts/${postId}/comments`),old=>{ old=old||[]; old.push({content:text,user:currentUser,replies:[]}); return old; });
 }
 
-// 无限套娃评论，第三层以后不显示楼号
 function renderPosts(data){
     postsContainer.innerHTML='';
     let entries=Object.entries(data||{}).filter(([id,p])=>p.tab===currentTab && !p.deleted);
     entries.forEach(([id,post],index)=>{
         const div=document.createElement('div');
         div.className='post'+(post.user===currentUser?' self':'');
-        div.innerHTML=`<div class="post-content">${index+1}L ${renderPostContent(post.content)}</div>
+        div.innerHTML=`<div class="post-content"><strong>${index+1}L</strong> ${formatContent(post.content, post.user===currentUser)}</div>
         <div class="post-info">发表时间: ${post.time}</div>
         <div class="post-actions">
         <button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button>
         ${(isAdmin || post.user===currentUser)?`<button onclick="deletePost('${id}')">删除</button>`:''}
         <button class="action-btn" onclick="replyPost('${id}')">回复</button>
         </div>`;
-        if(post.comments) div.innerHTML+=renderComments(post.comments,1,id);
         postsContainer.prepend(div);
     });
 }
 
-// 渲染评论
-function renderComments(comments, level, postId){
-    if(!comments || comments.length===0) return '';
-    let html='<div class="comments">';
-    comments.forEach((c,i)=>{
-        let prefix = level<=2 ? `<strong>${i+1}l</strong> ` : '';
-        html+=`<div class="comment">${prefix}${renderPostContent(c.content)} <button onclick="replyToComment('${postId}',${i})">回复</button></div>`;
-        html+=renderComments(c.replies,level+1,postId);
-    });
-    html+='</div>';
-    return html;
-}
-
-function renderPostContent(content){
-    if(content.length>100){
-        return `<span class="short-text">${content.slice(0,100)}</span><span class="full-text" style="display:none">${content.slice(100)}</span> <span class="expand-btn" onclick="toggleExpand(this)">展开</span>`;
-    }
-    return content;
+// 超过100字显示展开
+function formatContent(text,isSelf){
+    if(text.length<=100) return text;
+    return `<span class="short-text">${text.slice(0,100)}</span><span class="full-text">${text.slice(100)}</span> <span class="expand-btn" onclick="toggleExpand(this)">展开</span>`;
 }
 
 window.toggleExpand=function(btn){
     const parent=btn.parentElement;
-    const shortText=parent.querySelector('.short-text');
-    const fullText=parent.querySelector('.full-text');
-    if(fullText.style.display==='none'){
-        fullText.style.display='inline';
-        btn.textContent='收起';
-    }else{
-        fullText.style.display='none';
-        btn.textContent='展开';
-    }
-}
-
-window.replyToComment=function(postId,index){
-    const text=prompt("请输入回复：");
-    if(!text) return;
-    runTransaction(ref(db,`posts/${postId}/comments/${index}/replies`),old=>{ old=old||[]; old.push({content:text,user:currentUser,replies:[]}); return old; });
+    parent.querySelector('.short-text').style.display = parent.querySelector('.short-text').style.display==='none'?'inline':'none';
+    parent.querySelector('.full-text').style.display = parent.querySelector('.full-text').style.display==='none'?'inline':'none';
+    btn.textContent = btn.textContent==='展开'?'收起':'展开';
 }
 
 function renderTrash(data){
