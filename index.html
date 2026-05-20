@@ -28,7 +28,7 @@ header p, #bookBtn { font-size:1rem; color:#ffeb3b; cursor:pointer; margin-top:0
 .tab-btn.active.sun { background: linear-gradient(135deg,#ff5722,#ffeb3b);}
 .tab-btn.active.moon { background: linear-gradient(135deg,#32cd32,#ffa500);}
 #trashBtn { cursor:pointer; font-size:1.2rem; margin-left:0.5rem; }
-#searchBox { width:100%; padding:0.5rem; border-radius:10px; border:2px solid #ccc; margin-bottom:1rem; color:#555; }
+#searchBox { width:90vw; max-width:1200px; padding:0.5rem; border-radius:10px; border:2px solid #ccc; margin-bottom:1rem; color:#555; }
 #searchBox::placeholder { color:#aaa; }
 .new-post textarea { width:100%; height:80px; padding:0.5rem; border-radius:10px; border:2px solid #fff; resize:none; margin-bottom:0.5rem; background:rgba(255,255,255,0.85);}
 .new-post textarea::placeholder { color:#666; }
@@ -106,7 +106,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let currentTab = '';
-let currentUser = prompt("访问密码是 笨蛋：")||"匿名";
+let currentUser = prompt("访问密码是 笨蛋")||"匿名";
 let isAdmin = JSON.parse(localStorage.getItem('isAdmin')||'false');
 
 const postsContainer = document.getElementById('posts');
@@ -125,7 +125,7 @@ let lastData={};
 
 // 超级管理员权限
 apoiwndBtn.addEventListener('click',()=>{
-    const pwd = prompt("请输入超级管理员密码：");
+    const pwd = prompt("输入正确密码即刻解锁神秘功能当上大管理员：");
     if(pwd==="94084vzjj"){ isAdmin=true; localStorage.setItem('isAdmin',true); bookBtn.style.display='inline-block'; alert("已获得管理员权限"); } 
     else alert("多问问自己配不配");
 });
@@ -161,7 +161,7 @@ onValue(ref(db,'posts'),snapshot=>{
         const moonPosts = Object.values(lastData).filter(p=>p.tab==='moon' && !p.deleted);
         if(moonPosts.length>0){
             const rand = moonPosts[Math.floor(Math.random()*moonPosts.length)];
-            alert("🎠"+rand.content);
+            alert(""+rand.content);
         }
     }
 });
@@ -227,7 +227,7 @@ function renderPosts(data){
         <div class="post-info">发表时间: ${post.time}</div>
         <div class="post-actions">
         <button class="action-btn" onclick="likePost('${id}')">👍 ${post.likes||0}</button>
-        ${(isAdmin)?`<button onclick="deletePost('${id}')">🚽</button>`:''}
+        ${(isAdmin)?`<button onclick="deletePost('${id}')">💩➡️🚽</button>`:''}
         <button class="action-btn" onclick="replyPost('${id}')">異議あり！</button>
         </div>`;
 
